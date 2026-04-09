@@ -54,10 +54,11 @@ export async function GET(req: NextRequest) {
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "인력Pool");
 
-  const buf = XLSX.write(wb, { type: "buffer", bookType: "xlsx" });
+  const buf = XLSX.write(wb, { type: "array", bookType: "xlsx" });
+  const uint8 = new Uint8Array(buf);
   const date = new Date().toISOString().slice(0, 10);
 
-  return new NextResponse(buf, {
+  return new NextResponse(uint8, {
     headers: {
       "Content-Type": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       "Content-Disposition": `attachment; filename="Neordinary_인력Pool_${date}.xlsx"`,
