@@ -8,11 +8,10 @@ export default function Home() {
       {/* Navigation */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-xl border-b border-zinc-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center">
             <div className="bg-zinc-900 rounded-lg px-3 py-1.5">
-              <Image src="/logo.png" alt="Ne(o)rdinary" width={120} height={28} className="h-5 w-auto" />
+              <Image src="/logo.png" alt="Ne(o)rdinary Hire" width={120} height={28} className="h-5 w-auto" />
             </div>
-            <span className="text-sm font-medium text-zinc-400 hidden sm:block">Hire</span>
           </Link>
           <Link
             href="/register"
@@ -156,11 +155,10 @@ export default function Home() {
       {/* Footer */}
       <footer className="py-12 px-6 border-t border-zinc-100">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
+          <div className="flex items-center">
             <div className="bg-zinc-900 rounded-lg px-2.5 py-1">
-              <Image src="/logo.png" alt="Ne(o)rdinary" width={100} height={24} className="h-4 w-auto" />
+              <Image src="/logo.png" alt="Ne(o)rdinary Hire" width={100} height={24} className="h-4 w-auto" />
             </div>
-            <span className="text-xs text-zinc-400">Hire</span>
           </div>
           <div className="flex items-center gap-6 text-sm text-zinc-400">
             <a

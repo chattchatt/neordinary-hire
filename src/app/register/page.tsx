@@ -71,11 +71,10 @@ export default function RegisterPage() {
       {/* Nav */}
       <nav className="fixed top-0 left-0 right-0 z-50 bg-white/85 backdrop-blur-xl border-b border-zinc-100">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-3">
+          <Link href="/" className="flex items-center">
             <div className="bg-zinc-900 rounded-lg px-3 py-1.5">
-              <Image src="/logo.png" alt="Ne(o)rdinary" width={120} height={28} className="h-5 w-auto" />
+              <Image src="/logo.png" alt="Ne(o)rdinary Hire" width={120} height={28} className="h-5 w-auto" />
             </div>
-            <span className="text-sm font-medium text-zinc-400 hidden sm:block">Hire</span>
           </Link>
           <Link href="/" className="text-sm text-zinc-400 hover:text-zinc-900 transition-colors">
             돌아가기
