@@ -2,19 +2,20 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { motion, useInView } from "framer-motion";
-import { useRef } from "react";
-import { ArrowRight, Users, Shield, RefreshCw, Building2, ChevronRight } from "lucide-react";
+import { motion, useInView, useMotionValue, useTransform, useSpring } from "framer-motion";
+import { useRef, useState, useEffect } from "react";
+import { ArrowRight } from "lucide-react";
 
-function FadeIn({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
+/* ── Utility: Fade on scroll ─────────────────────────────────────── */
+function Reveal({ children, delay = 0, className = "" }: { children: React.ReactNode; delay?: number; className?: string }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
+  const inView = useInView(ref, { once: true, margin: "-60px" });
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, y: 30 }}
-      animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 }}
-      transition={{ duration: 0.6, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
+      initial={{ opacity: 0, y: 24 }}
+      animate={inView ? { opacity: 1, y: 0 } : {}}
+      transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
       className={className}
     >
       {children}
@@ -22,26 +23,104 @@ function FadeIn({ children, delay = 0, className = "" }: { children: React.React
   );
 }
 
-function SlideIn({ children, direction = "left", delay = 0 }: { children: React.ReactNode; direction?: "left" | "right"; delay?: number }) {
+/* ── Count-up number ─────────────────────────────────────────────── */
+function CountUp({ target, suffix = "", duration = 2 }: { target: number; suffix?: string; duration?: number }) {
   const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-80px" });
-  const x = direction === "left" ? -40 : 40;
+  const inView = useInView(ref, { once: true });
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!inView) return;
+    let start = 0;
+    const step = target / (duration * 60);
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) { setCount(target); clearInterval(timer); }
+      else setCount(Math.floor(start));
+    }, 1000 / 60);
+    return () => clearInterval(timer);
+  }, [inView, target, duration]);
+
+  return <span ref={ref}>{count.toLocaleString()}{suffix}</span>;
+}
+
+/* ── Flip Words ──────────────────────────────────────────────────── */
+function FlipWords({ words, interval = 2500 }: { words: string[]; interval?: number }) {
+  const [index, setIndex] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIndex((i) => (i + 1) % words.length), interval);
+    return () => clearInterval(t);
+  }, [words.length, interval]);
+
+  return (
+    <span className="inline-block relative h-[1.1em] overflow-hidden align-bottom">
+      {words.map((word, i) => (
+        <motion.span
+          key={word}
+          className="absolute left-0"
+          initial={{ y: 40, opacity: 0 }}
+          animate={{ y: i === index ? 0 : -40, opacity: i === index ? 1 : 0 }}
+          transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+        >
+          {word}
+        </motion.span>
+      ))}
+    </span>
+  );
+}
+
+/* ── 3D Tilt Card ────────────────────────────────────────────────── */
+function TiltCard({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useSpring(useTransform(y, [-0.5, 0.5], [8, -8]), { stiffness: 200, damping: 20 });
+  const rotateY = useSpring(useTransform(x, [-0.5, 0.5], [-8, 8]), { stiffness: 200, damping: 20 });
+
+  const handleMouse = (e: React.MouseEvent) => {
+    const rect = ref.current?.getBoundingClientRect();
+    if (!rect) return;
+    x.set((e.clientX - rect.left) / rect.width - 0.5);
+    y.set((e.clientY - rect.top) / rect.height - 0.5);
+  };
+  const reset = () => { x.set(0); y.set(0); };
+
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, x }}
-      animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x }}
-      transition={{ duration: 0.6, delay, ease: [0.21, 0.47, 0.32, 0.98] }}
+      onMouseMove={handleMouse}
+      onMouseLeave={reset}
+      style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+      className={className}
     >
       {children}
     </motion.div>
   );
 }
 
-export default function Home() {
+/* ── Dot Grid Background ─────────────────────────────────────────── */
+function DotGrid() {
   return (
-    <main className="min-h-screen bg-white overflow-hidden">
-      {/* Navigation */}
+    <div className="absolute inset-0 -z-10 overflow-hidden">
+      <div
+        className="absolute inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage: "radial-gradient(circle, #18181B 1px, transparent 1px)",
+          backgroundSize: "24px 24px",
+        }}
+      />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-zinc-200/40 to-transparent rounded-full blur-3xl" />
+    </div>
+  );
+}
+
+/* ── Main Page ────────────────────────────────────────────────────── */
+export default function Home() {
+  const companies = ["네이버", "카카오", "쿠팡", "토스", "당근", "라인"];
+
+  return (
+    <main className="min-h-screen bg-white text-zinc-900 overflow-hidden">
+      {/* Nav */}
       <motion.nav
         initial={{ y: -20, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
@@ -58,224 +137,219 @@ export default function Home() {
             href="/register"
             className="bg-zinc-900 text-white px-5 py-2.5 rounded-full text-sm font-medium hover:bg-zinc-700 transition-all hover:scale-105 active:scale-95"
           >
-            인재 등록
+            등록하기
           </Link>
         </div>
       </motion.nav>
 
-      {/* Hero */}
-      <section className="pt-40 pb-24 px-6">
+      {/* ─── Hero ─── */}
+      <section className="relative pt-44 pb-32 px-6">
+        <DotGrid />
         <div className="max-w-4xl mx-auto text-center">
           <motion.h1
-            initial={{ opacity: 0, y: 40 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-zinc-900 leading-[1.1]"
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="text-5xl sm:text-6xl md:text-8xl font-bold tracking-tight leading-[1.05]"
           >
-            한 번 등록하면,
+            어디든.
           </motion.h1>
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.15, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-zinc-900 leading-[1.1]"
-          >
-            모든 파트너 기업이
-          </motion.h1>
-          <motion.h1
-            initial={{ opacity: 0, y: 40 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3, ease: [0.21, 0.47, 0.32, 0.98] }}
-            className="text-4xl sm:text-5xl md:text-7xl font-bold tracking-tight text-zinc-400 leading-[1.1]"
-          >
-            당신을 찾습니다.
-          </motion.h1>
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
-            className="mt-8 text-lg sm:text-xl text-zinc-500 max-w-2xl mx-auto leading-relaxed"
-          >
-            너디너리 소속 IT 빌더로 등록하세요.
-            <br className="hidden sm:block" />
-            부산은행을 포함한 모든 파트너 기업의 채용 기회에 자동으로 노출됩니다.
-          </motion.p>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.65 }}
-            className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4"
+            transition={{ duration: 0.6, delay: 0.3 }}
+            className="mt-6 text-lg sm:text-xl text-zinc-400 font-medium"
+          >
+            <FlipWords words={companies} interval={1800} />
+            <span className="text-zinc-300 mx-2">·</span>
+            <span className="text-zinc-300">못 가는 곳이 없습니다.</span>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+            className="mt-12"
           >
             <Link
               href="/register"
-              className="bg-zinc-900 text-white px-8 py-4 rounded-full text-base font-medium hover:bg-zinc-700 transition-all hover:scale-105 active:scale-95 hover:shadow-xl flex items-center gap-2 w-full sm:w-auto justify-center"
+              className="inline-flex items-center gap-2 bg-zinc-900 text-white px-8 py-4 rounded-full text-base font-medium hover:bg-zinc-700 transition-all hover:scale-105 active:scale-95 hover:shadow-2xl"
             >
-              지금 등록하기
+              프로필 등록
               <ArrowRight className="w-4 h-4" />
             </Link>
           </motion.div>
-          <motion.p
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
-            className="mt-6 text-sm text-zinc-400"
-          >
-            현재 등록된 빌더 <span className="font-semibold text-zinc-600">0</span>명 · 참여 기업{" "}
-            <span className="font-semibold text-zinc-600">1</span>개
-          </motion.p>
         </div>
       </section>
 
-      {/* Divider */}
-      <div className="max-w-6xl mx-auto px-6">
-        <motion.div
-          initial={{ scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.8 }}
-          className="h-px bg-zinc-100 origin-left"
-        />
-      </div>
+      {/* ─── Stats ─── */}
+      <section className="py-20 px-6 border-t border-zinc-100">
+        <div className="max-w-5xl mx-auto grid grid-cols-3 gap-8 text-center">
+          {[
+            { value: 6500, suffix: "+", label: "Verified Builders" },
+            { value: 120, suffix: "+", label: "Top-tier Placements" },
+            { value: 7, suffix: "일", label: "Avg. Matching Lead Time" },
+          ].map((stat, i) => (
+            <Reveal key={stat.label} delay={i * 0.1}>
+              <div>
+                <p className="text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight">
+                  <CountUp target={stat.value} suffix={stat.suffix} />
+                </p>
+                <p className="mt-2 text-sm text-zinc-400 tracking-wide">{stat.label}</p>
+              </div>
+            </Reveal>
+          ))}
+        </div>
+      </section>
 
-      {/* Value Props */}
+      {/* ─── Path Cards ─── */}
       <section className="py-24 px-6">
         <div className="max-w-6xl mx-auto">
-          <div className="grid md:grid-cols-3 gap-8 md:gap-12">
+          <Reveal>
+            <p className="text-sm text-zinc-400 tracking-widest uppercase text-center mb-16">Your Path</p>
+          </Reveal>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[
-              { icon: Users, title: "한 번의 등록, 무한한 기회", desc: "한 번 프로필을 등록하면 현재와 미래의 모든 파트너 기업에 자동으로 노출됩니다. 따로 지원할 필요가 없습니다." },
-              { icon: Shield, title: "커뮤니티가 검증한 인재", desc: "UMC/CMC 활동 이력이 곧 신뢰입니다. 너디너리 소속이라는 것만으로 기업에게 차별화된 인재로 인식됩니다." },
-              { icon: RefreshCw, title: "가용성 자동 관리", desc: "주기적으로 가용 상태를 갱신하여 항상 최신 정보를 유지합니다. 기업은 즉시 투입 가능한 인재를 바로 찾을 수 있습니다." },
-            ].map((item, i) => (
-              <FadeIn key={item.title} delay={i * 0.15}>
-                <div className="space-y-4 group">
-                  <motion.div
-                    whileHover={{ scale: 1.05, rotate: 3 }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                    className="w-12 h-12 bg-zinc-50 rounded-2xl flex items-center justify-center group-hover:bg-zinc-900 transition-colors duration-300"
-                  >
-                    <item.icon className="w-5 h-5 text-zinc-900 group-hover:text-white transition-colors duration-300" />
-                  </motion.div>
-                  <h3 className="text-xl font-bold text-zinc-900">{item.title}</h3>
-                  <p className="text-zinc-500 leading-relaxed">{item.desc}</p>
-                </div>
-              </FadeIn>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Partners */}
-      <section className="py-24 px-6 bg-zinc-50/50">
-        <div className="max-w-6xl mx-auto text-center">
-          <FadeIn>
-            <p className="text-sm font-medium text-zinc-400 uppercase tracking-widest">함께하는 기업들</p>
-          </FadeIn>
-          <div className="mt-12 flex flex-wrap items-center justify-center gap-12">
-            {["BNK부산은행", "자버", "AWS"].map((name, i) => (
-              <FadeIn key={name} delay={0.1 + i * 0.15}>
-                <motion.div
-                  whileHover={{ scale: 1.1 }}
-                  className="flex items-center gap-3 cursor-default"
-                >
-                  <Building2 className="w-6 h-6 text-zinc-300" />
-                  <span className="text-xl font-bold text-zinc-300">{name}</span>
-                </motion.div>
-              </FadeIn>
-            ))}
-          </div>
-          <FadeIn delay={0.4}>
-            <p className="mt-8 text-sm text-zinc-400">더 많은 기업이 합류하고 있습니다</p>
-          </FadeIn>
-        </div>
-      </section>
-
-      {/* Process */}
-      <section className="py-24 px-6">
-        <div className="max-w-4xl mx-auto">
-          <FadeIn>
-            <h2 className="text-3xl sm:text-4xl font-bold text-zinc-900 text-center">어떻게 진행되나요?</h2>
-          </FadeIn>
-          <div className="mt-16 space-y-12">
-            {[
-              { step: "01", title: "프로필 등록", desc: "기본 정보와 기술 스택, 경력 사항을 입력하세요. 3분이면 충분합니다." },
-              { step: "02", title: "커뮤니티 인증", desc: "UMC/CMC 활동 이력으로 신뢰도를 높이세요. 프로젝트 포트폴리오도 추가할 수 있습니다." },
-              { step: "03", title: "기업 매칭", desc: "파트너 기업이 역할, 스킬, 지역별로 인재를 검색합니다. 별도 지원 없이 자동 노출됩니다." },
-            ].map((item, i) => (
-              <SlideIn key={item.step} direction={i % 2 === 0 ? "left" : "right"} delay={i * 0.1}>
-                <div className="flex gap-6 sm:gap-8 items-start group">
-                  <motion.span
-                    whileHover={{ scale: 1.2 }}
-                    className="text-4xl sm:text-5xl font-bold text-zinc-200 shrink-0 group-hover:text-zinc-900 transition-colors duration-500 w-16 sm:w-20 text-right tabular-nums"
-                  >
-                    {item.step}
-                  </motion.span>
-                  <div>
-                    <h3 className="text-xl font-bold text-zinc-900">{item.title}</h3>
-                    <p className="mt-2 text-zinc-500 leading-relaxed">{item.desc}</p>
+              { num: "01", title: "GROWTH", sub: "폭발적 성장", tags: ["#EarlyStage", "#CoreMember", "#Equity"], desc: "J커브를 그리는 스타트업의 핵심 멤버로." },
+              { num: "02", title: "WEALTH", sub: "최상위 보상", tags: ["#FinTech", "#TopComp", "#Stock"], desc: "개발자에게 최상위 연봉을 제공하는 금융권으로." },
+              { num: "03", title: "STABILITY", sub: "검증된 무대", tags: ["#BigTech", "#Scale", "#System"], desc: "대규모 트래픽과 체계적 성장 프로그램의 빅테크로." },
+              { num: "04", title: "GLOBAL", sub: "경계 없는 무대", tags: ["#Overseas", "#Relocation", "#GlobalHQ"], desc: "국내 실력을 글로벌 무대로 확장." },
+            ].map((path, i) => (
+              <Reveal key={path.title} delay={i * 0.1}>
+                <TiltCard className="group cursor-default">
+                  <div className="relative bg-zinc-50 rounded-2xl p-6 h-64 flex flex-col justify-between border border-zinc-100 hover:border-zinc-300 hover:bg-white transition-all duration-300 overflow-hidden">
+                    <div>
+                      <span className="text-xs text-zinc-300 font-mono">{path.num}</span>
+                      <h3 className="text-lg font-bold mt-1 tracking-tight">{path.title}</h3>
+                      <p className="text-sm text-zinc-500 mt-1">{path.sub}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {path.tags.map((tag) => (
+                        <span key={tag} className="text-xs text-zinc-400 bg-zinc-100 group-hover:bg-zinc-50 px-2 py-0.5 rounded-full transition-colors">{tag}</span>
+                      ))}
+                    </div>
+                    {/* Hover reveal */}
+                    <div className="absolute inset-0 bg-zinc-900 text-white p-6 flex items-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl">
+                      <p className="text-sm leading-relaxed">{path.desc}</p>
+                    </div>
                   </div>
-                </div>
-              </SlideIn>
+                </TiltCard>
+              </Reveal>
             ))}
           </div>
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-24 px-6 bg-zinc-900 relative overflow-hidden">
+      {/* ─── Process ─── */}
+      <section className="py-24 px-6 bg-zinc-50/50">
+        <div className="max-w-3xl mx-auto">
+          <Reveal>
+            <p className="text-sm text-zinc-400 tracking-widest uppercase text-center mb-16">How it works</p>
+          </Reveal>
+          <div className="relative">
+            {/* Vertical line */}
+            <div className="absolute left-[19px] top-0 bottom-0 w-px bg-zinc-200" />
+            <div className="space-y-12">
+              {[
+                { num: "01", title: "프로필 등록", desc: "3분. 스택, 커리어 방향, 커뮤니티 이력." },
+                { num: "02", title: "전담 큐레이션", desc: "리크루팅 팀이 직접 검토. 레퍼런스 크로스 체크." },
+                { num: "03", title: "맞춤형 매칭", desc: "당신이 선택한 Path에 맞춰 기업을 직접 연결." },
+                { num: "04", title: "오퍼 & 합류", desc: "인터뷰 조율부터 처우 협상까지. 합류 후에도 네트워크." },
+              ].map((step, i) => (
+                <Reveal key={step.num} delay={i * 0.1}>
+                  <div className="flex gap-6 items-start">
+                    <div className="relative z-10 w-10 h-10 bg-white border-2 border-zinc-200 rounded-full flex items-center justify-center text-xs font-bold text-zinc-400 shrink-0 group-hover:border-zinc-900">
+                      {step.num}
+                    </div>
+                    <div className="pt-1.5">
+                      <h3 className="text-base font-bold">{step.title}</h3>
+                      <p className="text-sm text-zinc-400 mt-1">{step.desc}</p>
+                    </div>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Ecosystem ─── */}
+      <section className="py-24 px-6">
+        <div className="max-w-5xl mx-auto">
+          <Reveal>
+            <p className="text-sm text-zinc-400 tracking-widest uppercase text-center mb-16">Ecosystem</p>
+          </Reveal>
+          <div className="grid md:grid-cols-3 gap-5">
+            {[
+              { name: "Ne(o)rdinary", role: "IT 생태계 통합 플랫폼", tags: ["#NerdCon", "#ConnectDay", "#Festival"] },
+              { name: "UMC", role: "University MakeUs Challenge", tags: ["#전국대학연합", "#스터디", "#해커톤"] },
+              { name: "CMC", role: "Central MakeUs Challenge", tags: ["#MVP런칭", "#BM검증", "#수익형앱"] },
+            ].map((eco, i) => (
+              <Reveal key={eco.name} delay={i * 0.12}>
+                <TiltCard>
+                  <div className="border border-zinc-200 rounded-2xl p-6 hover:border-zinc-400 transition-all duration-300 h-48 flex flex-col justify-between">
+                    <div>
+                      <h3 className="text-xl font-bold">{eco.name}</h3>
+                      <p className="text-xs text-zinc-400 mt-1">{eco.role}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {eco.tags.map((tag) => (
+                        <span key={tag} className="text-xs text-zinc-400 bg-zinc-50 px-2 py-0.5 rounded-full">{tag}</span>
+                      ))}
+                    </div>
+                  </div>
+                </TiltCard>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ─── CTA ─── */}
+      <section className="py-32 px-6 bg-zinc-900 relative overflow-hidden">
         <motion.div
           animate={{ rotate: 360 }}
-          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
-          className="absolute -top-40 -right-40 w-80 h-80 border border-zinc-800 rounded-full"
+          transition={{ duration: 80, repeat: Infinity, ease: "linear" }}
+          className="absolute -top-60 -right-60 w-[500px] h-[500px] border border-zinc-800 rounded-full"
         />
         <motion.div
           animate={{ rotate: -360 }}
-          transition={{ duration: 45, repeat: Infinity, ease: "linear" }}
-          className="absolute -bottom-20 -left-20 w-60 h-60 border border-zinc-800 rounded-full"
+          transition={{ duration: 60, repeat: Infinity, ease: "linear" }}
+          className="absolute -bottom-40 -left-40 w-[400px] h-[400px] border border-zinc-800 rounded-full"
         />
-        <div className="max-w-4xl mx-auto text-center relative z-10">
-          <FadeIn>
-            <h2 className="text-3xl sm:text-5xl font-bold text-white leading-tight">
-              지금 바로 등록하고
-              <br />
-              채용 기회를 넓히세요
-            </h2>
-          </FadeIn>
-          <FadeIn delay={0.15}>
-            <p className="mt-6 text-zinc-400 text-lg">
-              너디너리 소속만으로 부산은행, 자버 등 파트너 기업에 자동 노출됩니다.
-            </p>
-          </FadeIn>
-          <FadeIn delay={0.3}>
+        <div className="max-w-3xl mx-auto text-center relative z-10">
+          <Reveal>
+            <h2 className="text-4xl sm:text-6xl font-bold text-white tracking-tight">원한다면.</h2>
+          </Reveal>
+          <Reveal delay={0.15}>
+            <p className="mt-4 text-zinc-500 text-lg">당신의 니즈에 맞는 최고의 회사를 소개합니다.</p>
+          </Reveal>
+          <Reveal delay={0.3}>
             <Link
               href="/register"
-              className="mt-10 inline-flex items-center gap-2 bg-white text-zinc-900 px-8 py-4 rounded-full text-base font-medium hover:bg-zinc-100 transition-all hover:scale-105 active:scale-95 hover:shadow-2xl"
+              className="mt-10 inline-flex items-center gap-2 bg-white text-zinc-900 px-8 py-4 rounded-full text-base font-medium hover:bg-zinc-100 transition-all hover:scale-105 active:scale-95"
             >
-              지금 등록하기
-              <ChevronRight className="w-4 h-4" />
+              등록하기
+              <ArrowRight className="w-4 h-4" />
             </Link>
-          </FadeIn>
+          </Reveal>
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="py-12 px-6 border-t border-zinc-100">
-        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center">
-            <div className="bg-zinc-900 rounded-lg px-2.5 py-1">
-              <Image src="/logo.png" alt="Ne(o)rdinary Hire" width={100} height={24} className="h-4 w-auto" />
-            </div>
+      {/* ─── Footer ─── */}
+      <footer className="py-10 px-6 border-t border-zinc-100">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="bg-zinc-900 rounded-lg px-2.5 py-1">
+            <Image src="/logo.png" alt="Ne(o)rdinary" width={100} height={24} className="h-4 w-auto" />
           </div>
-          <div className="flex items-center gap-6 text-sm text-zinc-400">
-            <a
-              href="http://pf.kakao.com/_xcwDJT"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="hover:text-zinc-900 transition-colors"
-            >
-              추가 문의 (카카오톡)
-            </a>
-          </div>
-          <p className="text-xs text-zinc-300">© 2026 Ne(o)rdinary. All rights reserved.</p>
+          <a
+            href="http://pf.kakao.com/_xcwDJT"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm text-zinc-400 hover:text-zinc-900 transition-colors"
+          >
+            문의
+          </a>
+          <p className="text-xs text-zinc-300">© 2026 Ne(o)rdinary</p>
         </div>
       </footer>
     </main>
