@@ -1,0 +1,71 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Member {
+  id                String   @id @default(cuid())
+  name              String
+  email             String   @unique
+  phone             String
+  birthDate         DateTime?
+
+  affiliation       String
+  organization      String?
+  roles             String[]
+
+  techStack         String
+  certifications    String?
+  experience        String?
+  projectExperience String?  @db.Text
+
+  communityType     String?
+  generation        Int?
+  communityRole     String?
+  track             String?
+
+  availability      String
+  workType          String
+  workRegion        String
+  employmentTypes   String[]
+
+  portfolioUrl      String?
+  bio               String?  @db.Text
+  notes             String?  @db.Text
+
+  availabilityUpdatedAt DateTime @default(now())
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  bookmarks         Bookmark[]
+}
+
+model Company {
+  id           String   @id @default(cuid())
+  name         String
+  industry     String?
+  region       String?
+  contactName  String?
+  contactEmail String?
+  isApproved   Boolean  @default(false)
+  createdAt    DateTime @default(now())
+
+  bookmarks    Bookmark[]
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  companyId String
+  memberId  String
+  memo      String?  @db.Text
+  createdAt DateTime @default(now())
+
+  company   Company  @relation(fields: [companyId], references: [id])
+  member    Member   @relation(fields: [memberId], references: [id])
+
+  @@unique([companyId, memberId])
+}
