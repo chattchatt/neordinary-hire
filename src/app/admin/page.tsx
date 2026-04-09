@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect, useCallback } from "react";
-import { Search, Download, Upload, X, ChevronUp, ChevronDown, Bookmark } from "lucide-react";
+import { Search, Download, Upload, X, ChevronUp, ChevronDown, Bookmark, Lock } from "lucide-react";
+import Image from "next/image";
 
 interface MemberData {
   id: string;
@@ -29,7 +30,71 @@ interface MemberData {
 
 type SortKey = "name" | "availability" | "workRegion" | "createdAt";
 
+function LoginGate({ onAuth }: { onAuth: () => void }) {
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+      if (res.ok) {
+        onAuth();
+      } else {
+        setError("비밀번호가 올바르지 않습니다.");
+      }
+    } catch {
+      setError("네트워크 오류. 다시 시도해주세요.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-zinc-50 flex items-center justify-center px-6">
+      <div className="w-full max-w-sm">
+        <div className="text-center mb-8">
+          <div className="inline-flex bg-zinc-900 rounded-lg px-3 py-1.5 mb-4">
+            <Image src="/logo.png" alt="Ne(o)rdinary Hire" width={120} height={28} className="h-5 w-auto" />
+          </div>
+          <h1 className="text-2xl font-bold text-zinc-900">Admin</h1>
+          <p className="text-sm text-zinc-400 mt-1">관리자 비밀번호를 입력하세요</p>
+        </div>
+        <form onSubmit={handleLogin} className="space-y-4">
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
+            <input
+              type="password"
+              placeholder="비밀번호"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full border border-zinc-200 rounded-lg pl-10 pr-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 focus:border-transparent"
+              autoFocus
+            />
+          </div>
+          {error && <p className="text-sm text-red-500">{error}</p>}
+          <button
+            type="submit"
+            disabled={loading || !password}
+            className="w-full bg-zinc-900 text-white py-3 rounded-lg text-sm font-medium hover:bg-zinc-700 transition-colors disabled:opacity-40"
+          >
+            {loading ? "확인 중..." : "로그인"}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
+}
+
 export default function AdminPage() {
+  const [authed, setAuthed] = useState(false);
   const [members, setMembers] = useState<MemberData[]>([]);
   const [stats, setStats] = useState({ total: 0, thisMonth: 0, availableNow: 0 });
   const [loading, setLoading] = useState(true);
@@ -39,6 +104,15 @@ export default function AdminPage() {
   const [sortAsc, setSortAsc] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
+
+  // 쿠키로 이미 인증됐는지 확인
+  useEffect(() => {
+    if (document.cookie.includes("admin_token=")) {
+      setAuthed(true);
+    }
+  }, []);
+
+  if (!authed) return <LoginGate onAuth={() => setAuthed(true)} />;
 
   const fetchMembers = useCallback(async () => {
     setLoading(true);

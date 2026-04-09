@@ -205,7 +205,7 @@ export default function Home() {
                 <div className="flex gap-6 sm:gap-8 items-start group">
                   <motion.span
                     whileHover={{ scale: 1.2 }}
-                    className="text-4xl sm:text-5xl font-bold text-zinc-200 shrink-0 group-hover:text-zinc-900 transition-colors duration-500"
+                    className="text-4xl sm:text-5xl font-bold text-zinc-200 shrink-0 group-hover:text-zinc-900 transition-colors duration-500 w-16 sm:w-20 text-right tabular-nums"
                   >
                     {item.step}
                   </motion.span>

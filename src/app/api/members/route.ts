@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { verifyAuth, unauthorizedResponse } from "@/lib/auth";
 
-// GET /api/members — 인재 목록 조회 (필터/검색/정렬)
+// GET /api/members — 인재 목록 조회 (인증 필요)
 export async function GET(req: NextRequest) {
+  if (!verifyAuth(req)) return unauthorizedResponse();
   const { searchParams } = req.nextUrl;
   const search = searchParams.get("search") || "";
   const role = searchParams.get("role") || "";

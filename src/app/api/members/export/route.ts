@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { verifyAuth, unauthorizedResponse } from "@/lib/auth";
 import * as XLSX from "xlsx";
 
 export const dynamic = "force-dynamic";
 
-// GET /api/members/export — 부산은행 포맷 엑셀 다운로드
+// GET /api/members/export — 부산은행 포맷 엑셀 다운로드 (인증 필요)
 export async function GET(req: NextRequest) {
+  if (!verifyAuth(req)) return unauthorizedResponse();
   try {
     const { searchParams } = req.nextUrl;
     const role = searchParams.get("role") || "";
