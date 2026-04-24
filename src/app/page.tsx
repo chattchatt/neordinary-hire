@@ -168,13 +168,20 @@ export default function Home() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="mt-12"
+            className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-3"
           >
             <Link
-              href="/register"
+              href="/register/quick"
               className="inline-flex items-center gap-2 bg-zinc-900 text-white px-8 py-4 rounded-full text-base font-medium hover:bg-zinc-700 transition-all hover:scale-105 active:scale-95 hover:shadow-2xl"
             >
-              프로필 등록
+              1분 간편 등록
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+            <Link
+              href="/register"
+              className="inline-flex items-center gap-2 bg-white text-zinc-900 border border-zinc-300 px-8 py-4 rounded-full text-base font-medium hover:bg-zinc-50 transition-all hover:scale-105 active:scale-95"
+            >
+              상세 프로필 등록
               <ArrowRight className="w-4 h-4" />
             </Link>
           </motion.div>
@@ -324,13 +331,22 @@ export default function Home() {
             <p className="mt-4 text-zinc-500 text-lg">당신의 니즈에 맞는 최고의 회사를 소개합니다.</p>
           </Reveal>
           <Reveal delay={0.3}>
-            <Link
-              href="/register"
-              className="mt-10 inline-flex items-center gap-2 bg-white text-zinc-900 px-8 py-4 rounded-full text-base font-medium hover:bg-zinc-100 transition-all hover:scale-105 active:scale-95"
-            >
-              등록하기
-              <ArrowRight className="w-4 h-4" />
-            </Link>
+            <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                href="/register/quick"
+                className="inline-flex items-center gap-2 bg-white text-zinc-900 px-8 py-4 rounded-full text-base font-medium hover:bg-zinc-100 transition-all hover:scale-105 active:scale-95"
+              >
+                1분 간편 등록
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+              <Link
+                href="/register"
+                className="inline-flex items-center gap-2 bg-transparent text-white border border-white/40 px-8 py-4 rounded-full text-base font-medium hover:bg-white/10 transition-all hover:scale-105 active:scale-95"
+              >
+                상세 프로필 등록
+                <ArrowRight className="w-4 h-4" />
+              </Link>
+            </div>
           </Reveal>
         </div>
       </section>
