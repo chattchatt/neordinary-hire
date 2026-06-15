@@ -49,8 +49,10 @@ export default function RegisterPage() {
             : typeof data.member?.hireLinkCode === "string"
               ? data.member.hireLinkCode
               : "";
-        const codeParam = hireLinkCode ? `?code=${encodeURIComponent(hireLinkCode)}&profile=full` : "?profile=full";
-        window.location.href = `/register/quick/success${codeParam}`;
+        const params = new URLSearchParams({ profile: "full" });
+        if (hireLinkCode) params.set("code", hireLinkCode);
+        if (form.discordHandle.trim()) params.set("discord", "submitted");
+        window.location.href = `/register/quick/success?${params.toString()}`;
       } else {
         alert("등록 실패: " + (data.error || "다시 시도해주세요."));
       }
@@ -95,7 +97,7 @@ export default function RegisterPage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-zinc-900">인재 등록</h1>
           <p className="mt-2 text-zinc-500">프로필을 등록하면 적합한 채용·프로젝트 기회 검토 대상에 포함됩니다.</p>
           <p className="mt-2 text-xs text-zinc-400">
-            Discord 닉네임을 함께 남기면 직접 봇 명령어를 입력하지 않아도 운영팀/봇이 커뮤니티 활동 맥락 매칭을 시도합니다.
+            Discord ID·사용자명·서버 닉네임을 함께 남기면 직접 봇 명령어를 입력하지 않아도 운영팀/봇이 커뮤니티 활동 맥락 매칭을 시도합니다.
           </p>
 
           {/* Progress */}
@@ -243,16 +245,16 @@ export default function RegisterPage() {
                   </>
                 )}
                 <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4">
-                  <label className={labelClass}>Discord 닉네임 또는 사용자명</label>
+                  <label className={labelClass}>Discord ID·사용자명·서버 닉네임</label>
                   <input
                     type="text"
                     className={inputClass}
-                    placeholder="예: codexlive 또는 코덱스라이브"
+                    placeholder="예: codexlive, chattchatt#1234, 코덱스라이브"
                     value={form.discordHandle}
                     onChange={(e) => updateField("discordHandle", e.target.value)}
                     maxLength={80}
                   />
-                  <p className="mt-1 text-xs text-zinc-400">직접 Discord 명령어를 입력하지 않아도 운영팀/봇이 서버 멤버와 매칭을 시도합니다.</p>
+                  <p className="mt-1 text-xs text-zinc-400">본인이 기억하는 Discord ID, 사용자명, 서버 닉네임 중 편한 것을 입력하세요. 직접 명령어를 입력하지 않아도 매칭 검토가 시작됩니다.</p>
                   <label className="mt-3 flex items-start gap-2 text-xs text-zinc-500 leading-relaxed">
                     <input
                       type="checkbox"
@@ -260,7 +262,7 @@ export default function RegisterPage() {
                       checked={form.activityConsent}
                       onChange={(e) => updateField("activityConsent", e.target.checked)}
                     />
-                    <span>Discord 서버 내 닉네임·역할·활동 맥락을 인재풀 매칭 검토에 활용하는 데 동의합니다.</span>
+                    <span>Discord 서버 내 닉네임·역할·활동 맥락을 인재풀 매칭 검토에 활용하는 데 동의합니다. 동의하면 운영팀이 더 정확하게 확인할 수 있습니다.</span>
                   </label>
                 </div>
               </>

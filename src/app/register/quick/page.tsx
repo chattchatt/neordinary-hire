@@ -105,8 +105,11 @@ export default function QuickRegisterPage() {
       }
 
       const hireLinkCode = typeof data.hireLinkCode === "string" ? data.hireLinkCode : "";
-      const codeParam = hireLinkCode ? `?code=${encodeURIComponent(hireLinkCode)}` : "";
-      router.push(`/register/quick/success${codeParam}`);
+      const params = new URLSearchParams();
+      if (hireLinkCode) params.set("code", hireLinkCode);
+      if (form.discordHandle.trim()) params.set("discord", "submitted");
+      const query = params.toString();
+      router.push(`/register/quick/success${query ? `?${query}` : ""}`);
     } catch {
       setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
@@ -302,18 +305,18 @@ export default function QuickRegisterPage() {
             {/* Discord handle */}
             <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4">
               <label className={labelClass}>
-                Discord 닉네임 또는 사용자명 <span className="text-zinc-400 font-normal text-xs ml-1">선택</span>
+                Discord ID·사용자명·서버 닉네임 <span className="text-zinc-400 font-normal text-xs ml-1">선택</span>
               </label>
               <input
                 type="text"
                 className={inputClass}
-                placeholder="예: codexlive 또는 코덱스라이브"
+                placeholder="예: codexlive, chattchatt#1234, 코덱스라이브"
                 value={form.discordHandle}
                 onChange={(e) => updateField("discordHandle", e.target.value)}
                 maxLength={80}
               />
               <p className={hintClass}>
-                직접 Discord 명령어를 입력하지 않아도 운영팀/봇이 서버 멤버와 매칭을 시도합니다.
+                본인이 기억하는 Discord ID, 사용자명, 서버 닉네임 중 편한 것을 입력하세요. 직접 명령어를 입력하지 않아도 매칭 검토가 시작됩니다.
               </p>
               <label className="mt-3 flex items-start gap-2 text-xs text-zinc-500 leading-relaxed">
                 <input
@@ -322,7 +325,7 @@ export default function QuickRegisterPage() {
                   checked={form.activityConsent}
                   onChange={(e) => updateField("activityConsent", e.target.checked)}
                 />
-                <span>Discord 서버 내 닉네임·역할·활동 맥락을 인재풀 매칭 검토에 활용하는 데 동의합니다.</span>
+                <span>Discord 서버 내 닉네임·역할·활동 맥락을 인재풀 매칭 검토에 활용하는 데 동의합니다. 동의하면 운영팀이 더 정확하게 확인할 수 있습니다.</span>
               </label>
             </div>
 
