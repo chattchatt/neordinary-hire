@@ -10,6 +10,7 @@ import {
   CheckCircle2,
   Code2,
   ExternalLink,
+  FolderOpen,
   Mail,
   MapPin,
   MessageSquare,
@@ -35,6 +36,23 @@ interface DiscordActivityEvidenceData {
   contentExcerpt: string;
   messageUrl: string | null;
   occurredAt: string;
+}
+
+interface GoogleDriveEvidenceData {
+  id: string;
+  fileId: string;
+  title: string;
+  url: string | null;
+  mimeType: string | null;
+  sourceType: string;
+  matchedBy: string;
+  matchConfidence: string | null;
+  projectName: string | null;
+  role: string | null;
+  contentExcerpt: string | null;
+  summary: string | null;
+  occurredAt: string | null;
+  createdAt: string;
 }
 
 interface MemberData {
@@ -75,6 +93,7 @@ interface MemberData {
   activityConsentAt: string | null;
   activities: MemberActivityData[];
   activityEvidence: DiscordActivityEvidenceData[];
+  driveEvidence: GoogleDriveEvidenceData[];
 }
 
 function formatDateTime(value: string | null): string {
@@ -104,6 +123,7 @@ function formatActivityType(type: string): string {
     "auto-link": "계정 자동 매칭",
     link: "직접 인증",
     sync: "프로필/활동 동기화",
+    "evidence-sync": "근거 동기화",
   };
   return labels[type] || type;
 }
@@ -120,6 +140,40 @@ function groupEvidenceByDate(evidence: DiscordActivityEvidenceData[]) {
     groups[date] = [...(groups[date] || []), item];
     return groups;
   }, {});
+}
+
+function groupDriveEvidenceByProject(evidence: GoogleDriveEvidenceData[]) {
+  const groups = evidence.reduce<Record<string, GoogleDriveEvidenceData[]>>((acc, item) => {
+    const key = item.projectName || "프로젝트 미지정";
+    acc[key] = [...(acc[key] || []), item];
+    return acc;
+  }, {});
+
+  return Object.entries(groups)
+    .map(([project, items]) => ({
+      project,
+      items: items.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()),
+    }))
+    .sort((a, b) => b.items.length - a.items.length || a.project.localeCompare(b.project));
+}
+
+function formatDriveMimeType(mimeType: string | null): string {
+  if (!mimeType) return "Drive 파일";
+  if (mimeType.includes("spreadsheet")) return "Spreadsheet";
+  if (mimeType.includes("document")) return "Document";
+  if (mimeType.includes("presentation")) return "Presentation";
+  if (mimeType.includes("pdf")) return "PDF";
+  if (mimeType.includes("folder")) return "Folder";
+  if (mimeType.includes("image")) return "Image";
+  return "Drive 파일";
+}
+
+function formatMatchConfidence(value: string | null): string {
+  if (!value) return "확신도 미기록";
+  if (value === "high") return "높은 확신";
+  if (value === "medium") return "중간 확신";
+  if (value === "low") return "낮은 확신";
+  return value;
 }
 
 function getChannelStats(evidence: DiscordActivityEvidenceData[]) {
@@ -202,6 +256,7 @@ export default function AdminMemberDetailPage() {
   const activitySummary = useMemo(() => splitDiscordActivitySummary(member?.discordActivitySummary || null), [member]);
   const evidenceByDate = useMemo(() => groupEvidenceByDate(member?.activityEvidence || []), [member]);
   const channelStats = useMemo(() => getChannelStats(member?.activityEvidence || []), [member]);
+  const driveEvidenceByProject = useMemo(() => groupDriveEvidenceByProject(member?.driveEvidence || []), [member]);
 
   if (!authed) {
     return (
@@ -238,6 +293,7 @@ export default function AdminMemberDetailPage() {
 
   const discordStatus = member.discordUserId ? "인증 완료" : member.discordUsername ? "입력됨/자동 매칭 대기" : "미입력";
   const evidenceCount = member.activityEvidence?.length || 0;
+  const driveEvidenceCount = member.driveEvidence?.length || 0;
 
   return (
     <main className="min-h-screen bg-zinc-50">
@@ -255,10 +311,11 @@ export default function AdminMemberDetailPage() {
                   Discord {discordStatus}
                 </span>
                 {evidenceCount > 0 && <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">메시지 증거 {evidenceCount}건</span>}
+                {driveEvidenceCount > 0 && <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">Drive 근거 {driveEvidenceCount}건</span>}
               </div>
               <h1 className="mt-4 text-4xl font-black tracking-tight text-zinc-950">{member.name}</h1>
               <p className="mt-3 max-w-3xl text-base leading-7 text-zinc-600">
-                {member.bio || "등록폼 프로필과 NERDY Discord 봇이 수집한 커뮤니티 활동 근거를 한 화면에서 검토합니다."}
+                {member.bio || "등록폼 프로필, NERDY Discord 활동, Google Drive 프로젝트 산출물 근거를 한 화면에서 검토합니다."}
               </p>
             </div>
             <div className="grid min-w-[280px] gap-3 text-sm text-zinc-600">
@@ -270,9 +327,10 @@ export default function AdminMemberDetailPage() {
           </div>
         </section>
 
-        <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+        <section className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-6">
           <InfoCard icon={ShieldCheck} label="Discord 상태" value={discordStatus} />
           <InfoCard icon={MessageSquare} label="메시지 증거" value={`${evidenceCount}건`} />
+          <InfoCard icon={FolderOpen} label="Drive 산출물" value={`${driveEvidenceCount}건`} />
           <InfoCard icon={Activity} label="처리 로그" value={`${member.activities?.length || 0}건`} />
           <InfoCard icon={Briefcase} label="가용 시기" value={member.availability || "—"} />
           <InfoCard icon={Code2} label="역할" value={member.roles?.join(", ") || "—"} />
@@ -323,6 +381,62 @@ export default function AdminMemberDetailPage() {
           </section>
 
           <section className="space-y-6">
+            <div className="rounded-3xl border border-sky-100 bg-sky-50/40 p-6">
+              <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+                <div>
+                  <h2 className="text-xl font-bold text-zinc-900">Google Drive 프로젝트/산출물</h2>
+                  <p className="mt-1 text-sm text-zinc-500">인재풀 입력값과 Drive 문서·시트·제출물에서 매칭된 프로젝트 근거입니다.</p>
+                </div>
+                <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-sky-700">{driveEvidenceCount}건</span>
+              </div>
+
+              {driveEvidenceCount ? (
+                <div className="mt-6 space-y-5">
+                  {driveEvidenceByProject.map((group) => (
+                    <div key={group.project} className="rounded-2xl border border-sky-100 bg-white p-5">
+                      <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                        <h3 className="text-lg font-bold text-zinc-900">{group.project}</h3>
+                        <span className="rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">{group.items.length}개 근거</span>
+                      </div>
+                      <div className="space-y-3">
+                        {group.items.map((item) => (
+                          <article key={item.id} className="rounded-2xl border border-zinc-200 bg-zinc-50 p-4">
+                            <div className="mb-2 flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                              <span className="font-semibold text-zinc-800">{formatDriveMimeType(item.mimeType)}</span>
+                              {item.role && <span>{item.role}</span>}
+                              <span>{formatMatchConfidence(item.matchConfidence)}</span>
+                              <span>매칭: {item.matchedBy}</span>
+                              {item.occurredAt && <span>{formatDate(item.occurredAt)}</span>}
+                              {item.url && (
+                                <a href={item.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 text-sky-700 hover:text-sky-900">
+                                  Drive 열기 <ExternalLink className="h-3 w-3" />
+                                </a>
+                              )}
+                            </div>
+                            <p className="font-semibold text-zinc-900">{item.title}</p>
+                            {item.summary && <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-zinc-700">{item.summary}</p>}
+                            {item.contentExcerpt && (
+                              <div className="mt-3 rounded-xl border border-zinc-200 bg-white p-3">
+                                <p className="text-xs font-semibold text-zinc-400">원문/근거 발췌</p>
+                                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-zinc-800">{item.contentExcerpt}</p>
+                              </div>
+                            )}
+                          </article>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-6">
+                  <EmptyState
+                    title="아직 Drive 프로젝트 근거가 없습니다"
+                    description="neordinary.com Google Drive 연결 후 데모데이/CMC/UMC 산출물 백필을 실행하면 프로젝트명, 역할, 발표자료, GitHub/Notion 링크가 여기에 쌓입니다."
+                  />
+                </div>
+              )}
+            </div>
+
             <div className="rounded-3xl border border-zinc-200 bg-white p-6">
               <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
                 <div>

@@ -48,6 +48,7 @@ function withDiscordFallback(member: Record<string, unknown>) {
     activityConsentAt: null,
     activities: [],
     activityEvidence: [],
+    driveEvidence: [],
   };
 }
 
@@ -62,6 +63,7 @@ export async function GET(req: NextRequest, context: RouteContext<"/api/members/
       include: {
         activities: { orderBy: { occurredAt: "desc" }, take: 200 },
         activityEvidence: { orderBy: { occurredAt: "desc" }, take: 500 },
+        driveEvidence: { orderBy: { createdAt: "desc" }, take: 500 },
       },
     });
 
@@ -80,7 +82,7 @@ export async function GET(req: NextRequest, context: RouteContext<"/api/members/
 
     return NextResponse.json({
       member: withDiscordFallback(member),
-      schemaStatus: "discord_migration_required",
+      schemaStatus: "discord_or_drive_migration_required",
     });
   }
 }

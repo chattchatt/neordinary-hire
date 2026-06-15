@@ -8,69 +8,70 @@ datasource db {
 }
 
 model Member {
-  id                String   @id @default(cuid())
-  name              String
-  email             String   @unique
-  phone             String
-  birthDate         DateTime?
+  id        String    @id @default(cuid())
+  name      String
+  email     String    @unique
+  phone     String
+  birthDate DateTime?
 
-  affiliation       String
-  organization      String?
-  roles             String[]
+  affiliation  String
+  organization String?
+  roles        String[]
 
   techStack         String
   certifications    String?
   experience        String?
-  projectExperience String?  @db.Text
+  projectExperience String? @db.Text
 
-  communityType     String?
-  generation        Int?
-  communityRole     String?
-  track             String?
+  communityType String?
+  generation    Int?
+  communityRole String?
+  track         String?
 
-  availability      String
-  workType          String
-  workRegion        String
-  employmentTypes   String[]
+  availability    String
+  workType        String
+  workRegion      String
+  employmentTypes String[]
 
-  portfolioUrl      String?
-  bio               String?  @db.Text
-  notes             String?  @db.Text
+  portfolioUrl String?
+  bio          String? @db.Text
+  notes        String? @db.Text
 
-  isQuickRegister   Boolean  @default(false)
+  isQuickRegister Boolean @default(false)
 
   // Discord community trust integration
-  hireLinkCode      String?  @unique
-  discordUserId     String?  @unique
-  discordUsername   String?
-  discordDisplayName String?
-  discordNickname   String?
-  discordRoles      String[] @default([])
-  discordJoinedAt   DateTime?
-  lastDiscordActiveAt DateTime?
-  discordActivitySummary String? @db.Text
-  discordLinkedAt   DateTime?
-  activityConsentAt DateTime?
+  hireLinkCode           String?   @unique
+  discordUserId          String?   @unique
+  discordUsername        String?
+  discordDisplayName     String?
+  discordNickname        String?
+  discordRoles           String[]  @default([])
+  discordJoinedAt        DateTime?
+  lastDiscordActiveAt    DateTime?
+  discordActivitySummary String?   @db.Text
+  discordLinkedAt        DateTime?
+  activityConsentAt      DateTime?
 
   availabilityUpdatedAt DateTime @default(now())
-  createdAt         DateTime @default(now())
-  updatedAt         DateTime @updatedAt
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
 
-  bookmarks         Bookmark[]
-  activities        MemberActivity[]
-  activityEvidence  DiscordActivityEvidence[]
+  bookmarks        Bookmark[]
+  activities       MemberActivity[]
+  activityEvidence DiscordActivityEvidence[]
+  driveEvidence    GoogleDriveEvidence[]
 }
 
 model MemberActivity {
-  id        String   @id @default(cuid())
-  memberId  String
-  source    String
-  type      String
-  summary   String   @db.Text
+  id         String   @id @default(cuid())
+  memberId   String
+  source     String
+  type       String
+  summary    String   @db.Text
   occurredAt DateTime @default(now())
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
 
-  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@index([memberId, occurredAt])
 }
@@ -87,7 +88,7 @@ model DiscordActivityEvidence {
   occurredAt     DateTime
   createdAt      DateTime @default(now())
 
-  member         Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
 
   @@unique([memberId, messageId])
   @@index([memberId, occurredAt])
@@ -104,7 +105,7 @@ model Company {
   isApproved   Boolean  @default(false)
   createdAt    DateTime @default(now())
 
-  bookmarks    Bookmark[]
+  bookmarks Bookmark[]
 }
 
 model Bookmark {
@@ -114,8 +115,33 @@ model Bookmark {
   memo      String?  @db.Text
   createdAt DateTime @default(now())
 
-  company   Company  @relation(fields: [companyId], references: [id])
-  member    Member   @relation(fields: [memberId], references: [id])
+  company Company @relation(fields: [companyId], references: [id])
+  member  Member  @relation(fields: [memberId], references: [id])
 
   @@unique([companyId, memberId])
+}
+
+model GoogleDriveEvidence {
+  id              String    @id @default(cuid())
+  memberId        String
+  fileId          String
+  title           String
+  url             String?
+  mimeType        String?
+  sourceType      String    @default("drive")
+  matchedBy       String
+  matchConfidence String?
+  projectName     String?
+  role            String?
+  contentExcerpt  String?   @db.Text
+  summary         String?   @db.Text
+  occurredAt      DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  member Member @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@unique([memberId, fileId])
+  @@index([memberId, createdAt])
+  @@index([fileId])
 }
