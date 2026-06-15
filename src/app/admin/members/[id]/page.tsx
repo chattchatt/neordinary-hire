@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { buildDriveEvidenceReport } from "@/lib/drive-evidence-insights";
 import {
   Activity,
   ArrowLeft,
@@ -257,6 +258,7 @@ export default function AdminMemberDetailPage() {
   const evidenceByDate = useMemo(() => groupEvidenceByDate(member?.activityEvidence || []), [member]);
   const channelStats = useMemo(() => getChannelStats(member?.activityEvidence || []), [member]);
   const driveEvidenceByProject = useMemo(() => groupDriveEvidenceByProject(member?.driveEvidence || []), [member]);
+  const driveEvidenceReport = useMemo(() => buildDriveEvidenceReport(member?.driveEvidence || []), [member]);
 
   if (!authed) {
     return (
@@ -391,7 +393,94 @@ export default function AdminMemberDetailPage() {
               </div>
 
               {driveEvidenceCount ? (
-                <div className="mt-6 space-y-5">
+                <div className="mt-6 space-y-6">
+                  <div className="rounded-2xl border border-sky-200 bg-white p-5">
+                    <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                      <div>
+                        <p className="text-xs font-semibold uppercase tracking-wide text-sky-500">Drive 기반 인재 평가 리포트</p>
+                        <h3 className="mt-1 text-lg font-bold text-zinc-900">프로젝트 자료로 보는 검토 요약</h3>
+                        <p className="mt-1 text-sm leading-6 text-zinc-500">Drive에 남은 발표자료, 포트폴리오, 팀 산출물을 역량 신호와 프로젝트 참여 근거로 재구성했습니다.</p>
+                      </div>
+                      <span className={`rounded-full px-3 py-1 text-xs font-semibold ${driveEvidenceReport.reviewPriority === "매칭 확인 필요" ? "bg-amber-50 text-amber-700" : driveEvidenceReport.reviewPriority === "우선 검토" ? "bg-emerald-50 text-emerald-700" : "bg-zinc-100 text-zinc-600"}`}>
+                        검토 우선순위 · {driveEvidenceReport.reviewPriority}
+                      </span>
+                    </div>
+
+                    <div className="mt-5 grid gap-3 md:grid-cols-4">
+                      <div className="rounded-2xl bg-sky-50 p-4">
+                        <p className="text-xs font-semibold text-sky-600">프로젝트 참여 근거</p>
+                        <p className="mt-1 text-2xl font-black text-zinc-900">{driveEvidenceReport.projectCount}개</p>
+                      </div>
+                      <div className="rounded-2xl bg-indigo-50 p-4">
+                        <p className="text-xs font-semibold text-indigo-600">역량 신호</p>
+                        <p className="mt-1 text-2xl font-black text-zinc-900">{driveEvidenceReport.signals.filter((signal) => signal.count > 0).length}개</p>
+                      </div>
+                      <div className="rounded-2xl bg-emerald-50 p-4">
+                        <p className="text-xs font-semibold text-emerald-600">높은 확신 근거</p>
+                        <p className="mt-1 text-2xl font-black text-zinc-900">{driveEvidenceReport.highConfidenceCount}건</p>
+                      </div>
+                      <div className="rounded-2xl bg-amber-50 p-4">
+                        <p className="text-xs font-semibold text-amber-700">매칭 확인 필요</p>
+                        <p className="mt-1 text-2xl font-black text-zinc-900">{driveEvidenceReport.needsReviewCount}건</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-5 grid gap-4 lg:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
+                      <div className="rounded-2xl border border-zinc-200 p-4">
+                        <h4 className="font-bold text-zinc-900">역량 신호</h4>
+                        <div className="mt-3 space-y-3">
+                          {driveEvidenceReport.signals.map((signal) => (
+                            <div key={signal.label} className={`rounded-xl border p-3 ${signal.count > 0 ? "border-zinc-200 bg-zinc-50" : "border-zinc-100 bg-white text-zinc-400"}`}>
+                              <div className="flex items-center justify-between gap-3">
+                                <p className="font-semibold text-zinc-900">{signal.label}</p>
+                                <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-zinc-600">{signal.count}건</span>
+                              </div>
+                              <p className="mt-1 text-xs leading-5 text-zinc-500">{signal.description}</p>
+                              {signal.evidenceTitles.length > 0 && (
+                                <p className="mt-2 line-clamp-2 text-xs text-zinc-600">근거: {signal.evidenceTitles.join(" · ")}</p>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="rounded-2xl border border-zinc-200 p-4">
+                        <h4 className="font-bold text-zinc-900">프로젝트 참여 근거</h4>
+                        <div className="mt-3 space-y-3">
+                          {driveEvidenceReport.projectEvidence.slice(0, 4).map((project) => (
+                            <div key={project.project} className="rounded-xl bg-zinc-50 p-3">
+                              <div className="flex flex-wrap items-center justify-between gap-2">
+                                <p className="font-semibold text-zinc-900">{project.project}</p>
+                                <div className="flex flex-wrap gap-1">
+                                  <span className="rounded-full bg-white px-2 py-0.5 text-xs font-semibold text-zinc-600">{project.count}건</span>
+                                  {project.hasDirectEvidence && <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">직접 근거</span>}
+                                  {project.hasTeamEvidence && <span className="rounded-full bg-sky-50 px-2 py-0.5 text-xs font-semibold text-sky-700">팀 산출물</span>}
+                                  {project.needsReview && <span className="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700">매칭 확인 필요</span>}
+                                </div>
+                              </div>
+                              {project.roles.length > 0 && <p className="mt-2 text-xs text-zinc-500">역할: {project.roles.join(", ")}</p>}
+                              {project.summaries.length > 0 && <p className="mt-2 line-clamp-3 text-xs leading-5 text-zinc-600">{project.summaries[0]}</p>}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    {driveEvidenceReport.reviewNotes.length > 0 && (
+                      <div className="mt-5 rounded-2xl border border-amber-100 bg-amber-50 p-4">
+                        <h4 className="font-bold text-amber-900">운영진 확인 메모</h4>
+                        <ul className="mt-2 space-y-2 text-sm leading-6 text-amber-900">
+                          {driveEvidenceReport.reviewNotes.map((note) => (
+                            <li key={note}>· {note}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <h3 className="mb-3 text-sm font-bold text-zinc-500">원본 Drive 근거 목록</h3>
+                    <div className="space-y-5">
                   {driveEvidenceByProject.map((group) => (
                     <div key={group.project} className="rounded-2xl border border-sky-100 bg-white p-5">
                       <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -426,6 +515,8 @@ export default function AdminMemberDetailPage() {
                       </div>
                     </div>
                   ))}
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="mt-6">
