@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import { buildCompanyProfilePreview } from "@/lib/company-profile-curation";
 import { buildDriveEvidenceReport } from "@/lib/drive-evidence-insights";
 import {
   Activity,
@@ -259,6 +260,7 @@ export default function AdminMemberDetailPage() {
   const channelStats = useMemo(() => getChannelStats(member?.activityEvidence || []), [member]);
   const driveEvidenceByProject = useMemo(() => groupDriveEvidenceByProject(member?.driveEvidence || []), [member]);
   const driveEvidenceReport = useMemo(() => buildDriveEvidenceReport(member?.driveEvidence || []), [member]);
+  const companyProfilePreview = useMemo(() => (member ? buildCompanyProfilePreview(member) : null), [member]);
 
   if (!authed) {
     return (
@@ -337,6 +339,77 @@ export default function AdminMemberDetailPage() {
           <InfoCard icon={Briefcase} label="가용 시기" value={member.availability || "—"} />
           <InfoCard icon={Code2} label="역할" value={member.roles?.join(", ") || "—"} />
         </section>
+
+        {companyProfilePreview && (
+          <section className="mt-6 rounded-3xl border border-emerald-200 bg-emerald-50/50 p-6 shadow-sm">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-emerald-700">기업 전달용 인재 카드</p>
+                <h2 className="mt-2 text-2xl font-black text-zinc-950">{companyProfilePreview.headline}</h2>
+                <p className="mt-2 max-w-4xl text-sm leading-6 text-zinc-600">
+                  {companyProfilePreview.positioning}
+                </p>
+                <p className="mt-2 text-xs font-medium text-emerald-800">개인 연락처와 내부 원문 로그는 제외하고, 직무 관련 근거만 기업/기관에 전달하는 프리뷰입니다.</p>
+              </div>
+              <div className="rounded-2xl border border-emerald-200 bg-white px-5 py-4">
+                <p className="text-xs font-semibold text-zinc-400">추천 포지션</p>
+                <p className="mt-1 text-lg font-bold text-zinc-900">{companyProfilePreview.recommendedPosition}</p>
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {companyProfilePreview.logistics.map((item) => (
+                    <span key={item} className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">{item}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-6 grid gap-4 xl:grid-cols-3">
+              <div className="rounded-2xl border border-emerald-100 bg-white p-5">
+                <h3 className="font-bold text-zinc-900">직무 적합성</h3>
+                <ul className="mt-3 space-y-2 text-sm leading-6 text-zinc-600">
+                  {companyProfilePreview.jobFitSignals.map((signal) => (
+                    <li key={signal}>· {signal}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-100 bg-white p-5">
+                <h3 className="font-bold text-zinc-900">검증된 프로젝트 근거</h3>
+                <ul className="mt-3 space-y-2 text-sm leading-6 text-zinc-600">
+                  {companyProfilePreview.evidenceSummary.map((signal) => (
+                    <li key={signal}>· {signal}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="rounded-2xl border border-emerald-100 bg-white p-5">
+                <h3 className="font-bold text-zinc-900">협업/커뮤니티 신호</h3>
+                <ul className="mt-3 space-y-2 text-sm leading-6 text-zinc-600">
+                  {companyProfilePreview.collaborationSignals.map((signal) => (
+                    <li key={signal}>· {signal}</li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+
+            <div className="mt-4 rounded-2xl border border-amber-100 bg-white p-5">
+              <h3 className="font-bold text-amber-900">전달 전 확인 필요</h3>
+              <ul className="mt-3 space-y-2 text-sm leading-6 text-amber-900">
+                {companyProfilePreview.shareGuidance.map((item) => (
+                  <li key={item}>· {item}</li>
+                ))}
+              </ul>
+              {companyProfilePreview.publicLinks.length > 0 && (
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {companyProfilePreview.publicLinks.map((link) => (
+                    <a key={link} href={link} target="_blank" rel="noreferrer" className="inline-flex items-center gap-1 rounded-xl bg-zinc-900 px-3 py-2 text-xs font-semibold text-white hover:bg-zinc-700">
+                      공개 링크 열기 <ExternalLink className="h-3 w-3" />
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </section>
+        )}
 
         <div className="mt-6 grid gap-6 xl:grid-cols-[minmax(0,0.9fr)_minmax(0,1.5fr)]">
           <section className="space-y-6">
