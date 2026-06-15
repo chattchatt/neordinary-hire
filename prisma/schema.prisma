@@ -39,11 +39,39 @@ model Member {
 
   isQuickRegister   Boolean  @default(false)
 
+  // Discord community trust integration
+  hireLinkCode      String?  @unique
+  discordUserId     String?  @unique
+  discordUsername   String?
+  discordDisplayName String?
+  discordNickname   String?
+  discordRoles      String[] @default([])
+  discordJoinedAt   DateTime?
+  lastDiscordActiveAt DateTime?
+  discordActivitySummary String? @db.Text
+  discordLinkedAt   DateTime?
+  activityConsentAt DateTime?
+
   availabilityUpdatedAt DateTime @default(now())
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
   bookmarks         Bookmark[]
+  activities        MemberActivity[]
+}
+
+model MemberActivity {
+  id        String   @id @default(cuid())
+  memberId  String
+  source    String
+  type      String
+  summary   String   @db.Text
+  occurredAt DateTime @default(now())
+  createdAt DateTime @default(now())
+
+  member    Member   @relation(fields: [memberId], references: [id], onDelete: Cascade)
+
+  @@index([memberId, occurredAt])
 }
 
 model Company {

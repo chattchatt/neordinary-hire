@@ -41,7 +41,7 @@ export default function RegisterPage() {
         body: JSON.stringify(form),
       });
       if (res.ok) {
-        alert("등록이 완료되었습니다! 파트너 기업에 자동 노출됩니다.");
+        alert("등록이 완료되었습니다! 적합한 채용·프로젝트 기회 검토 대상에 포함됩니다.");
         window.location.href = "/";
       } else {
         const data = await res.json();
@@ -86,7 +86,7 @@ export default function RegisterPage() {
         <div className="max-w-2xl mx-auto">
           {/* Header */}
           <h1 className="text-3xl sm:text-4xl font-bold text-zinc-900">인재 등록</h1>
-          <p className="mt-2 text-zinc-500">프로필을 등록하면 모든 파트너 기업에 자동 노출됩니다.</p>
+          <p className="mt-2 text-zinc-500">프로필을 등록하면 적합한 채용·프로젝트 기회 검토 대상에 포함됩니다.</p>
 
           {/* Progress */}
           <div className="mt-8 flex gap-1.5">

@@ -7,7 +7,14 @@ export const metadata: Metadata = {
   description: "인재풀 등록이 완료되었습니다.",
 };
 
-export default function QuickRegisterSuccessPage() {
+interface QuickRegisterSuccessPageProps {
+  searchParams: Promise<{ code?: string }>;
+}
+
+export default async function QuickRegisterSuccessPage({ searchParams }: QuickRegisterSuccessPageProps) {
+  const { code } = await searchParams;
+  const hireLinkCode = typeof code === "string" ? code : "";
+
   return (
     <main className="min-h-screen bg-white flex flex-col">
       {/* Nav */}
@@ -34,8 +41,24 @@ export default function QuickRegisterSuccessPage() {
           <p className="text-zinc-500 text-sm leading-relaxed mb-8">
             너디너리 인재풀에 등록되었습니다.
             <br />
-            파트너 기업 채용 시 자동으로 노출됩니다.
+            적합한 파트너 채용·프로젝트 수요가 생기면 검토 후 연결될 수 있습니다.
           </p>
+
+          {hireLinkCode && (
+            <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 mb-6 text-left">
+              <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-2">Discord 커뮤니티 연동</p>
+              <p className="text-sm text-zinc-700 mb-3">
+                너디너리 디스코드에서 아래 연동 코드로 프로필을 연결하면, 대시보드에서 Discord 닉네임과 커뮤니티 활동 이력을 함께 볼 수 있습니다.
+              </p>
+              <p className="text-xs text-zinc-400 mb-1">연동 코드</p>
+              <div className="rounded-xl bg-white border border-indigo-100 px-4 py-3 font-mono text-lg font-bold tracking-wider text-zinc-900">
+                {hireLinkCode}
+              </div>
+              <p className="text-xs text-zinc-500 mt-3">
+                Discord에서 <span className="font-mono text-zinc-900">/hire-link code:{hireLinkCode}</span> 명령어를 실행하세요.
+              </p>
+            </div>
+          )}
 
           {/* Upsell */}
           <div className="bg-zinc-50 border border-zinc-200 rounded-2xl p-5 mb-8 text-left">

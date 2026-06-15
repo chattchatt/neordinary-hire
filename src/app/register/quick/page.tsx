@@ -102,7 +102,9 @@ export default function QuickRegisterPage() {
         return;
       }
 
-      router.push("/register/quick/success");
+      const hireLinkCode = typeof data.hireLinkCode === "string" ? data.hireLinkCode : "";
+      const codeParam = hireLinkCode ? `?code=${encodeURIComponent(hireLinkCode)}` : "";
+      router.push(`/register/quick/success${codeParam}`);
     } catch {
       setError("네트워크 오류가 발생했습니다. 다시 시도해주세요.");
     } finally {
@@ -145,9 +147,9 @@ export default function QuickRegisterPage() {
               너디너리 인재풀 등록
             </h1>
             <p className="mt-2 text-sm text-zinc-500 leading-relaxed">
-              부울경 UMC/CMC OB 전용 간이 등록폼입니다.
+              너디너리 커뮤니티와 파트너 기회를 연결하기 위한 빠른 등록폼입니다.
               <br />
-              7가지 항목만 입력하면 파트너 기업에 자동 노출됩니다.
+              7가지 항목만 입력하면 적합한 채용·프로젝트 수요 검토 대상에 포함됩니다.
             </p>
           </div>
 

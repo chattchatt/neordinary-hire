@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { generateHireLinkCode } from "@/lib/hire-link-code";
+import { isMissingColumnError } from "@/lib/prisma-compat";
 
 // In-memory rate limit store: ip -> timestamp of last successful submission
 // (Resets on server restart — acceptable for serverless edge; no external dependency needed)
@@ -90,7 +92,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Duplicate email check
-  const existing = await prisma.member.findUnique({ where: { email } });
+  const existing = await prisma.member.findUnique({ where: { email }, select: { id: true } });
   if (existing) {
     return NextResponse.json(
       { error: "already_exists", message: "이미 등록된 이메일입니다." },
@@ -98,26 +100,43 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const hireLinkCode = generateHireLinkCode();
+
   // Create member with required defaults for non-quick fields
-  const member = await prisma.member.create({
-    data: {
-      name,
-      email,
-      phone,
-      roles,
-      techStack,
-      availability,
-      employmentTypes,
-      // Quick register defaults for required schema fields
-      affiliation: "미입력",
-      workType: "미정",
-      workRegion: "미입력",
-      isQuickRegister: true,
-    },
-  });
+  let member;
+  try {
+    member = await prisma.member.create({
+      data: {
+        name,
+        email,
+        phone,
+        roles,
+        techStack,
+        availability,
+        employmentTypes,
+        hireLinkCode,
+        // Quick register defaults for required schema fields
+        affiliation: "미입력",
+        workType: "미정",
+        workRegion: "미입력",
+        isQuickRegister: true,
+      },
+    });
+  } catch (error) {
+    if (isMissingColumnError(error)) {
+      return NextResponse.json(
+        {
+          error: "서비스 준비 중입니다. Discord 연동 DB 마이그레이션 적용 후 등록이 가능합니다.",
+          schemaStatus: "discord_migration_required",
+        },
+        { status: 503 }
+      );
+    }
+    throw error;
+  }
 
   // Record rate limit timestamp after successful creation
   rateLimitStore.set(ip, Date.now());
 
-  return NextResponse.json({ success: true, memberId: member.id }, { status: 201 });
+  return NextResponse.json({ success: true, memberId: member.id, hireLinkCode: member.hireLinkCode }, { status: 201 });
 }

@@ -1,9 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth, unauthorizedResponse } from "@/lib/auth";
+import { isMissingColumnError } from "@/lib/prisma-compat";
 import * as XLSX from "xlsx";
 
 export const dynamic = "force-dynamic";
+
+type ExportMember = {
+  name: string;
+  affiliation: string;
+  organization: string | null;
+  phone: string;
+  email: string;
+  roles: string[];
+  techStack: string;
+  certifications: string | null;
+  experience: string | null;
+  projectExperience: string | null;
+  availability: string;
+  workType: string;
+  workRegion: string;
+  discordNickname?: string | null;
+  discordDisplayName?: string | null;
+  discordUsername?: string | null;
+  discordRoles?: string[];
+  discordActivitySummary?: string | null;
+  notes: string | null;
+};
 
 // GET /api/members/export — 부산은행 포맷 엑셀 다운로드 (인증 필요)
 export async function GET(req: NextRequest) {
@@ -23,13 +46,42 @@ export async function GET(req: NextRequest) {
     if (community) where.communityType = community;
     if (region) where.workRegion = { contains: region, mode: "insensitive" };
 
-    const members = await prisma.member.findMany({ where, orderBy: { createdAt: "desc" } });
+    let members: ExportMember[];
+    let hasDiscordSchema = true;
+    try {
+      members = await prisma.member.findMany({ where, orderBy: { createdAt: "desc" } });
+    } catch (error) {
+      if (!isMissingColumnError(error)) throw error;
+      hasDiscordSchema = false;
+      members = await prisma.member.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          affiliation: true,
+          organization: true,
+          roles: true,
+          techStack: true,
+          certifications: true,
+          experience: true,
+          projectExperience: true,
+          availability: true,
+          workType: true,
+          workRegion: true,
+          notes: true,
+          createdAt: true,
+        },
+      });
+    }
 
     const header = [
       "성명", "소속 구분", "소속 회사명", "연락처 / 이메일",
       "주요 역할", "기술 스택", "보유 자격증", "총 경력 (년)",
       "차세대 프로젝트 관련 경력", "가용 시기",
-      "희망 근무 형태", "근무 가능 지역", "기타 사항",
+      "희망 근무 형태", "근무 가능 지역", "Discord 닉네임", "Discord 표시명", "Discord 역할", "Discord 활동 요약", "기타 사항",
     ];
 
     const rows = members.map((m) => [
@@ -45,6 +97,10 @@ export async function GET(req: NextRequest) {
       m.availability,
       m.workType,
       m.workRegion,
+      hasDiscordSchema ? m.discordNickname || "" : "",
+      hasDiscordSchema ? m.discordDisplayName || m.discordUsername || "" : "",
+      hasDiscordSchema ? (m.discordRoles || []).join(", ") : "",
+      hasDiscordSchema ? m.discordActivitySummary || "" : "",
       m.notes || "",
     ]);
 
@@ -52,7 +108,7 @@ export async function GET(req: NextRequest) {
     ws["!cols"] = [
       { wch: 10 }, { wch: 12 }, { wch: 15 }, { wch: 30 }, { wch: 15 },
       { wch: 30 }, { wch: 20 }, { wch: 10 }, { wch: 30 }, { wch: 12 },
-      { wch: 15 }, { wch: 15 }, { wch: 20 },
+      { wch: 15 }, { wch: 15 }, { wch: 18 }, { wch: 18 }, { wch: 25 }, { wch: 40 }, { wch: 20 },
     ];
 
     const wb = XLSX.utils.book_new();

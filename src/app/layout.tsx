@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Ne(o)rdinary Hire — IT 빌더 인재 플랫폼",
+  title: "Ne(o)rdinary Hire — 검증된 빌더 커뮤니티와 기회를 연결합니다",
   description:
-    "한 번 등록하면, 너디너리의 모든 파트너 기업이 당신을 찾습니다. 부산/울산/경남 IT 인재 DB.",
+    "너디너리 커뮤니티의 검증된 IT 인재 데이터를 채용·프로젝트·파트너 수요와 연결하는 공식 인재 DB 서비스.",
   openGraph: {
     title: "Ne(o)rdinary Hire",
     description:
-      "한 번 등록하면, 너디너리의 모든 파트너 기업이 당신을 찾습니다.",
+      "검증된 빌더 커뮤니티를 채용·프로젝트 기회로 연결하는 Ne(o)rdinary 공식 인재 DB 서비스.",
     type: "website",
   },
 };

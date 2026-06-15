@@ -1,8 +1,16 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Search, Download, Upload, X, ChevronUp, ChevronDown, Bookmark, Lock } from "lucide-react";
 import Image from "next/image";
+
+interface MemberActivityData {
+  id: string;
+  source: string;
+  type: string;
+  summary: string;
+  occurredAt: string;
+}
 
 interface MemberData {
   id: string;
@@ -26,6 +34,18 @@ interface MemberData {
   bio: string | null;
   portfolioUrl: string | null;
   createdAt: string;
+  hireLinkCode: string | null;
+  discordUserId: string | null;
+  discordUsername: string | null;
+  discordDisplayName: string | null;
+  discordNickname: string | null;
+  discordRoles: string[];
+  discordJoinedAt: string | null;
+  lastDiscordActiveAt: string | null;
+  discordActivitySummary: string | null;
+  discordLinkedAt: string | null;
+  activityConsentAt: string | null;
+  activities: MemberActivityData[];
 }
 
 type SortKey = "name" | "availability" | "workRegion" | "createdAt";
@@ -93,10 +113,17 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
   );
 }
 
+function formatDate(value: string | null): string {
+  if (!value) return "—";
+  return new Date(value).toLocaleString("ko-KR");
+}
+
 export default function AdminPage() {
   const [authed, setAuthed] = useState(false);
   const [members, setMembers] = useState<MemberData[]>([]);
-  const [stats, setStats] = useState({ total: 0, thisMonth: 0, availableNow: 0 });
+  const [stats, setStats] = useState({ total: 0, thisMonth: 0, availableNow: 0, discordLinked: 0 });
+  const [schemaStatus, setSchemaStatus] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState("");
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filters, setFilters] = useState({ role: "", experience: "", availability: "", community: "" });
@@ -105,16 +132,14 @@ export default function AdminPage() {
   const [selected, setSelected] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
 
-  // 쿠키로 이미 인증됐는지 확인
   useEffect(() => {
     if (document.cookie.includes("admin_token=")) {
       setAuthed(true);
     }
   }, []);
 
-  if (!authed) return <LoginGate onAuth={() => setAuthed(true)} />;
-
   const fetchMembers = useCallback(async () => {
+    if (!authed) return;
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set("search", search);
@@ -127,15 +152,19 @@ export default function AdminPage() {
 
     try {
       const res = await fetch(`/api/members?${params}`);
+      if (!res.ok) throw new Error(`Failed to fetch members: ${res.status}`);
       const data = await res.json();
       setMembers(data.members || []);
-      setStats(data.stats || { total: 0, thisMonth: 0, availableNow: 0 });
-    } catch {
+      setStats(data.stats || { total: 0, thisMonth: 0, availableNow: 0, discordLinked: 0 });
+      setSchemaStatus(data.schemaStatus || null);
+      setLoadError("");
+    } catch (error) {
       console.error("Failed to fetch members");
+      setLoadError(error instanceof Error ? error.message : "인재 목록을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
-  }, [search, filters, sortKey, sortAsc]);
+  }, [authed, search, filters, sortKey, sortAsc]);
 
   useEffect(() => { fetchMembers(); }, [fetchMembers]);
 
@@ -160,9 +189,10 @@ export default function AdminPage() {
   const selectClass = "border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900";
   const selectedData = members.find((d) => d.id === selected);
 
+  if (!authed) return <LoginGate onAuth={() => setAuthed(true)} />;
+
   return (
     <main className="min-h-screen bg-zinc-50">
-      {/* Header */}
       <header className="bg-white border-b border-zinc-200 px-6 py-4">
         <div className="max-w-[1400px] mx-auto flex items-center justify-between">
           <div>
@@ -181,12 +211,26 @@ export default function AdminPage() {
       </header>
 
       <div className="max-w-[1400px] mx-auto px-6 py-6">
-        {/* Stats */}
-        <div className="grid grid-cols-3 gap-4 mb-6">
+        {schemaStatus === "discord_migration_required" && (
+          <div className="mb-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+            <p className="font-semibold">Discord 연동 DB 마이그레이션이 아직 적용되지 않았습니다.</p>
+            <p className="mt-1">
+              기존 인재풀 조회는 계속 가능하지만, 연동 코드 생성·Discord 닉네임/활동 동기화는 DB 마이그레이션 적용 후 활성화됩니다.
+            </p>
+          </div>
+        )}
+        {loadError && (
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {loadError}
+          </div>
+        )}
+
+        <div className="grid grid-cols-4 gap-4 mb-6">
           {[
             { label: "등록 인재", value: stats.total, suffix: "명" },
             { label: "이번 달 신규", value: stats.thisMonth, suffix: "명" },
             { label: "즉시 가용", value: stats.availableNow, suffix: "명" },
+            { label: "Discord 연결", value: stats.discordLinked, suffix: "명" },
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-xl border border-zinc-200 p-5">
               <p className="text-sm text-zinc-400">{s.label}</p>
@@ -195,12 +239,11 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {/* Filters */}
         <div className="bg-white rounded-xl border border-zinc-200 p-4 mb-4">
           <div className="flex flex-wrap gap-3 items-center">
             <div className="flex-1 min-w-[200px] relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" />
-              <input type="text" placeholder="이름, 스킬, 학교 등 검색..." className="w-full border border-zinc-200 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" value={search} onChange={(e) => setSearch(e.target.value)} />
+              <input type="text" placeholder="이름, 스킬, 학교, Discord 닉네임 검색..." className="w-full border border-zinc-200 rounded-lg pl-10 pr-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900" value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
             <select className={selectClass} value={filters.role} onChange={(e) => setFilters({ ...filters, role: e.target.value })}>
               <option value="">전체 역할</option>
@@ -226,16 +269,15 @@ export default function AdminPage() {
           </p>
         </div>
 
-        {/* Table */}
         <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-zinc-100 bg-zinc-50/50">
                   {([
-                    ["name", "성명"], ["role", "역할"], ["techStack", "기술 스택"], ["experience", "경력"],
+                    ["name", "성명"], ["role", "역할"], ["techStack", "기술 스택"], ["discord", "Discord"], ["experience", "경력"],
                     ["availability", "가용 시기"], ["workRegion", "지역"], ["createdAt", "등록일"]
-                  ] as [SortKey | "role" | "techStack" | "experience", string][]).map(([key, label]) => (
+                  ] as [SortKey | "role" | "techStack" | "discord" | "experience", string][]).map(([key, label]) => (
                     <th key={key} className="text-left px-4 py-3 font-medium text-zinc-500 cursor-pointer hover:text-zinc-900 select-none" onClick={() => (key === "name" || key === "availability" || key === "workRegion" || key === "createdAt") && handleSort(key as SortKey)}>
                       <span className="flex items-center gap-1">{label} {(key === "name" || key === "availability" || key === "workRegion" || key === "createdAt") && <SortIcon k={key as SortKey} />}</span>
                     </th>
@@ -244,12 +286,17 @@ export default function AdminPage() {
               </thead>
               <tbody>
                 {members.length === 0 && !loading ? (
-                  <tr><td colSpan={7} className="px-4 py-12 text-center text-zinc-400">등록된 인재가 없습니다. 멤버가 등록하면 여기에 표시됩니다.</td></tr>
+                  <tr><td colSpan={8} className="px-4 py-12 text-center text-zinc-400">등록된 인재가 없습니다. 멤버가 등록하면 여기에 표시됩니다.</td></tr>
                 ) : members.map((d) => (
                   <tr key={d.id} className="border-b border-zinc-50 hover:bg-zinc-50/50 cursor-pointer transition-colors" onClick={() => setSelected(d.id)}>
                     <td className="px-4 py-3 font-medium text-zinc-900">{d.name}</td>
                     <td className="px-4 py-3"><span className="bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-md text-xs">{d.roles.join(", ")}</span></td>
                     <td className="px-4 py-3 text-zinc-600 max-w-[200px] truncate">{d.techStack}</td>
+                    <td className="px-4 py-3 text-zinc-500">
+                      {d.discordUserId ? (
+                        <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md text-xs">{d.discordNickname || d.discordDisplayName || d.discordUsername}</span>
+                      ) : <span className="text-zinc-300">미연동</span>}
+                    </td>
                     <td className="px-4 py-3 text-zinc-500">{d.experience || "—"}</td>
                     <td className="px-4 py-3">
                       <span className={`px-2 py-0.5 rounded-md text-xs ${d.availability === "즉시" ? "bg-emerald-50 text-emerald-600" : "bg-zinc-100 text-zinc-500"}`}>{d.availability}</span>
@@ -264,7 +311,6 @@ export default function AdminPage() {
         </div>
       </div>
 
-      {/* Detail Panel */}
       {selectedData && (
         <div className="fixed inset-0 z-50 flex justify-end">
           <div className="absolute inset-0 bg-black/20" onClick={() => setSelected(null)} />
@@ -299,6 +345,48 @@ export default function AdminPage() {
                   <p className="text-sm text-zinc-900">{item.value || "—"}</p>
                 </div>
               ))}
+
+              <section className="rounded-2xl border border-indigo-100 bg-indigo-50/40 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <div>
+                    <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">커뮤니티 신뢰 정보</p>
+                    <p className="text-sm text-zinc-600 mt-1">NERDY Discord 봇으로 연동된 닉네임과 활동 히스토리입니다.</p>
+                  </div>
+                  <span className={`text-xs px-2 py-1 rounded-full ${selectedData.discordUserId ? "bg-indigo-600 text-white" : "bg-white text-zinc-400"}`}>
+                    {selectedData.discordUserId ? "연동됨" : "미연동"}
+                  </span>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div><p className="text-xs text-zinc-400">Discord 닉네임</p><p className="text-zinc-900">{selectedData.discordNickname || "—"}</p></div>
+                  <div><p className="text-xs text-zinc-400">표시명</p><p className="text-zinc-900">{selectedData.discordDisplayName || "—"}</p></div>
+                  <div><p className="text-xs text-zinc-400">사용자명</p><p className="text-zinc-900">{selectedData.discordUsername || "—"}</p></div>
+                  <div><p className="text-xs text-zinc-400">Discord ID</p><p className="text-zinc-900 break-all">{selectedData.discordUserId || "—"}</p></div>
+                  <div><p className="text-xs text-zinc-400">서버 합류</p><p className="text-zinc-900">{formatDate(selectedData.discordJoinedAt)}</p></div>
+                  <div><p className="text-xs text-zinc-400">최근 동기화</p><p className="text-zinc-900">{formatDate(selectedData.lastDiscordActiveAt)}</p></div>
+                </div>
+                <div className="mt-4">
+                  <p className="text-xs text-zinc-400 mb-1">역할</p>
+                  <p className="text-sm text-zinc-900">{selectedData.discordRoles?.length ? selectedData.discordRoles.join(", ") : "—"}</p>
+                </div>
+                <div className="mt-4">
+                  <p className="text-xs text-zinc-400 mb-1">활동 요약</p>
+                  <p className="text-sm text-zinc-900 whitespace-pre-wrap">{selectedData.discordActivitySummary || "—"}</p>
+                </div>
+                <div className="mt-4">
+                  <p className="text-xs text-zinc-400 mb-2">최근 활동 로그</p>
+                  {selectedData.activities?.length ? (
+                    <ul className="space-y-2">
+                      {selectedData.activities.map((activity) => (
+                        <li key={activity.id} className="rounded-lg bg-white border border-indigo-100 px-3 py-2">
+                          <p className="text-xs text-zinc-400">{activity.source} · {activity.type} · {formatDate(activity.occurredAt)}</p>
+                          <p className="text-sm text-zinc-800 mt-1">{activity.summary}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : <p className="text-sm text-zinc-400">아직 동기화된 활동이 없습니다.</p>}
+                </div>
+              </section>
+
               <div>
                 <p className="text-xs text-zinc-400 mb-1">메모</p>
                 <textarea className="w-full border border-zinc-200 rounded-lg p-3 text-sm min-h-[80px] resize-none focus:outline-none focus:ring-2 focus:ring-zinc-900" placeholder="내부 메모를 입력하세요..." />
@@ -308,7 +396,6 @@ export default function AdminPage() {
         </div>
       )}
 
-      {/* CSV Upload Modal */}
       {showUpload && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="absolute inset-0 bg-black/20" onClick={() => setShowUpload(false)} />
