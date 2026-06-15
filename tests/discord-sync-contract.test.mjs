@@ -50,6 +50,7 @@ test("Discord sync can auto-link a pending profile by submitted handle", () => {
   assert.match(syncRoute, /자동 매칭 후보가 여러 명/);
   assert.match(syncRoute, /discordLinkedAt: member.discordLinkedAt \|\| now/);
   assert.match(syncRoute, /activityType = "auto-link"/);
+  assert.match(syncRoute, /활동 상세는 아직 수집되지 않았습니다/);
   assert.match(syncRoute, /sanitize\(body\.activitySummary, 8000\)/);
 });
 
@@ -114,7 +115,18 @@ test("admin dashboard exposes Discord community trust information", () => {
   assert.match(admin, /채널별 활동/);
   assert.match(admin, /최근 활동 타임라인/);
   assert.match(admin, /수집 범위/);
+  assert.match(admin, /아직 활동 상세 수집 전/);
+  assert.match(admin, /Discord 계정 매칭만 완료된 상태/);
+  assert.match(admin, /\/hire-sync-activity @사용자/);
+  assert.match(admin, /계정 자동 매칭/);
+  assert.match(admin, /처리 내용/);
   assert.match(admin, /메시지 원문은 저장하지 않고 요약\/메타데이터만 확인/);
+});
+
+test("admin separates shallow Discord matching logs from activity drill-down", () => {
+  const admin = read("src/app/admin/page.tsx");
+  assert.match(admin, /markerIndex === -1\) return \{ overview: summary, depth: "", hasDepth: false \}/);
+  assert.match(admin, /isDeepDiscordActivity\(activity.summary\) \? "활동 상세 근거" : "처리 내용"/);
 });
 
 test("admin can filter Discord trust status and activity sync state", () => {

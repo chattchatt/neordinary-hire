@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
     const existingMember = await prisma.member.findUnique({ where: { discordUserId } });
     let member = existingMember;
     let activityType = "sync";
-    let defaultActivitySummary = "NERDY 봇에서 Discord 프로필을 동기화했습니다.";
+    let defaultActivitySummary = "Discord 프로필 동기화 완료. 활동 상세가 필요한 경우 Discord에서 /hire-sync-activity @사용자를 실행하세요.";
 
     if (!member) {
       try {
@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
         return NextResponse.json({ error: "먼저 /hire-link 연동이 필요합니다." }, { status: 404 });
       }
       activityType = "auto-link";
-      defaultActivitySummary = "NERDY 봇이 등록폼 Discord 입력값과 서버 멤버를 자동 매칭했습니다.";
+      defaultActivitySummary = "Discord 계정 자동 매칭 완료: 등록폼 Discord 입력값과 서버 멤버가 일치했습니다. 활동 상세는 아직 수집되지 않았습니다.";
     }
 
     const now = new Date();

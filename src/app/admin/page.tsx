@@ -118,15 +118,29 @@ function formatDate(value: string | null): string {
   return new Date(value).toLocaleString("ko-KR");
 }
 
-function splitDiscordActivitySummary(summary: string | null): { overview: string; depth: string } {
-  if (!summary) return { overview: "—", depth: "" };
+function splitDiscordActivitySummary(summary: string | null): { overview: string; depth: string; hasDepth: boolean } {
+  if (!summary) return { overview: "—", depth: "", hasDepth: false };
   const marker = "[활동 딥다이브]";
   const markerIndex = summary.indexOf(marker);
-  if (markerIndex === -1) return { overview: summary, depth: summary };
+  if (markerIndex === -1) return { overview: summary, depth: "", hasDepth: false };
   return {
     overview: summary.slice(0, markerIndex).trim() || "—",
     depth: summary.slice(markerIndex + marker.length).trim(),
+    hasDepth: true,
   };
+}
+
+function formatActivityType(type: string): string {
+  const labels: Record<string, string> = {
+    "auto-link": "계정 자동 매칭",
+    link: "직접 인증",
+    sync: "프로필/활동 동기화",
+  };
+  return labels[type] || type;
+}
+
+function isDeepDiscordActivity(summary: string): boolean {
+  return summary.includes("[활동 딥다이브]");
 }
 
 export default function AdminPage() {
@@ -443,22 +457,33 @@ export default function AdminPage() {
                   <p className="text-xs text-zinc-400 mb-1">활동 요약</p>
                   <p className="text-sm text-zinc-900 whitespace-pre-wrap">{selectedDiscordActivity.overview}</p>
                 </div>
-                <details className="mt-4 rounded-xl border border-indigo-100 bg-white" open={Boolean(selectedDiscordActivity.depth)}>
+                <details className="mt-4 rounded-xl border border-indigo-100 bg-white" open={selectedDiscordActivity.hasDepth}>
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3 text-sm font-semibold text-indigo-800">
                     <span className="flex items-center gap-2"><Activity className="h-4 w-4" /> 활동 딥다이브</span>
-                    <span className="text-xs font-normal text-zinc-400">채널별 활동 · 최근 활동 타임라인 · 수집 범위</span>
+                    <span className="text-xs font-normal text-zinc-400">{selectedDiscordActivity.hasDepth ? "채널별 활동 · 최근 활동 타임라인 · 수집 범위" : "아직 활동 상세 수집 전"}</span>
                   </summary>
                   <div className="border-t border-indigo-50 px-3 py-3 space-y-3">
-                    <div>
-                      <p className="text-xs font-semibold text-zinc-500 mb-1">채널별 활동</p>
-                      <p className="text-sm text-zinc-800 whitespace-pre-wrap">{selectedDiscordActivity.depth || "동기화된 채널별 활동이 없습니다."}</p>
-                    </div>
-                    <div className="grid gap-2 rounded-lg bg-indigo-50/60 p-3 text-xs text-zinc-600">
-                      <p className="font-semibold text-indigo-800">운영 판단 포인트</p>
-                      <p>· 최근 활동 타임라인에서 실제 커뮤니티 참여의 최신성을 봅니다.</p>
-                      <p>· 채널별 활동에서 관심사/기여 영역을 봅니다.</p>
-                      <p>· 수집 범위에서 봇 권한 때문에 빠진 채널이 있는지 확인합니다.</p>
-                    </div>
+                    {selectedDiscordActivity.hasDepth ? (
+                      <>
+                        <div>
+                          <p className="text-xs font-semibold text-zinc-500 mb-1">채널별 활동 · 최근 활동 타임라인 · 수집 범위</p>
+                          <p className="text-sm text-zinc-800 whitespace-pre-wrap">{selectedDiscordActivity.depth}</p>
+                        </div>
+                        <div className="grid gap-2 rounded-lg bg-indigo-50/60 p-3 text-xs text-zinc-600">
+                          <p className="font-semibold text-indigo-800">운영 판단 포인트</p>
+                          <p>· 최근 활동 타임라인에서 실제 커뮤니티 참여의 최신성을 봅니다.</p>
+                          <p>· 채널별 활동에서 관심사/기여 영역을 봅니다.</p>
+                          <p>· 수집 범위에서 봇 권한 때문에 빠진 채널이 있는지 확인합니다.</p>
+                        </div>
+                      </>
+                    ) : (
+                      <div className="grid gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
+                        <p className="font-semibold">아직 활동 상세 수집 전입니다.</p>
+                        <p>이 사람은 Discord 계정 매칭만 완료된 상태입니다.</p>
+                        <p>채널별 활동/최근 활동 타임라인은 아직 수집되지 않았습니다.</p>
+                        <p>Discord에서 운영진이 <code className="rounded bg-white px-1 py-0.5 text-xs">/hire-sync-activity @사용자</code>를 실행하면 이 영역이 실제 활동 근거로 채워집니다.</p>
+                      </div>
+                    )}
                   </div>
                 </details>
                 <div className="mt-4">
@@ -467,7 +492,8 @@ export default function AdminPage() {
                     <ul className="space-y-2">
                       {selectedData.activities.map((activity) => (
                         <li key={activity.id} className="rounded-lg bg-white border border-indigo-100 px-3 py-2">
-                          <p className="text-xs text-zinc-400">{activity.source} · {activity.type} · {formatDate(activity.occurredAt)}</p>
+                          <p className="text-xs text-zinc-400">{activity.source} · {formatActivityType(activity.type)} · {formatDate(activity.occurredAt)}</p>
+                          <p className="text-xs font-semibold text-zinc-500 mt-1">{isDeepDiscordActivity(activity.summary) ? "활동 상세 근거" : "처리 내용"}</p>
                           <p className="text-sm text-zinc-800 mt-1 whitespace-pre-wrap">{activity.summary}</p>
                         </li>
                       ))}
