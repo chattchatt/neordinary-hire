@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { isMissingColumnError } from "@/lib/prisma-compat";
+import { isMissingColumnError, isMissingRelationError } from "@/lib/prisma-compat";
 import { assertDiscordSyncAuth, parseOptionalDate, sanitize, sanitizeStringArray } from "../_utils";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +19,42 @@ function discordHandleCandidates(...values: string[]) {
     if (withoutDiscriminator) candidates.add(withoutDiscriminator);
   }
   return [...candidates].filter(Boolean).slice(0, 12);
+}
+
+
+type DiscordActivityEventInput = {
+  messageId?: unknown;
+  channelId?: unknown;
+  channelName?: unknown;
+  messageType?: unknown;
+  contentExcerpt?: unknown;
+  messageUrl?: unknown;
+  occurredAt?: unknown;
+};
+
+function sanitizeActivityEvents(value: unknown) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      const event = item as DiscordActivityEventInput;
+      const messageId = sanitize(event.messageId, 80);
+      const channelId = sanitize(event.channelId, 80);
+      const channelName = sanitize(event.channelName, 120);
+      const contentExcerpt = sanitize(event.contentExcerpt, 1200);
+      const occurredAt = parseOptionalDate(event.occurredAt);
+      if (!messageId || !channelId || !channelName || !contentExcerpt || !occurredAt) return null;
+      return {
+        messageId,
+        channelId,
+        channelName,
+        messageType: sanitize(event.messageType, 40) || "message",
+        contentExcerpt,
+        messageUrl: sanitize(event.messageUrl, 300) || null,
+        occurredAt,
+      };
+    })
+    .filter((event): event is NonNullable<typeof event> => Boolean(event))
+    .slice(0, 100);
 }
 
 async function findPendingMemberByDiscordHandle(body: Record<string, unknown>) {
@@ -86,6 +122,8 @@ export async function POST(req: NextRequest) {
     const activitySummary = sanitize(body.activitySummary, 8000) || defaultActivitySummary;
     const occurredAt = parseOptionalDate(body.lastActiveAt) || now;
     const discordRoles = Array.isArray(body.discordRoles) ? sanitizeStringArray(body.discordRoles) : member.discordRoles;
+    const activityEvents = sanitizeActivityEvents(body.activityEvents);
+
     const updated = await prisma.member.update({
       where: { id: member.id },
       data: {
@@ -103,9 +141,16 @@ export async function POST(req: NextRequest) {
       include: { activities: { orderBy: { occurredAt: "desc" }, take: 5 } },
     });
 
-    return NextResponse.json({ success: true, memberId: updated.id, syncedAt: now.toISOString() });
+    if (activityEvents.length) {
+      await prisma.discordActivityEvidence.createMany({
+        data: activityEvents.map((event) => ({ ...event, memberId: updated.id })),
+        skipDuplicates: true,
+      });
+    }
+
+    return NextResponse.json({ success: true, memberId: updated.id, syncedAt: now.toISOString(), evidenceCount: activityEvents.length });
   } catch (error) {
-    if (isMissingColumnError(error)) {
+    if (isMissingColumnError(error) || isMissingRelationError(error)) {
       return NextResponse.json(
         {
           error: "Discord 연동 DB 마이그레이션이 필요합니다.",

@@ -12,6 +12,17 @@ interface MemberActivityData {
   occurredAt: string;
 }
 
+interface DiscordActivityEvidenceData {
+  id: string;
+  messageId: string;
+  channelId: string;
+  channelName: string;
+  messageType: string;
+  contentExcerpt: string;
+  messageUrl: string | null;
+  occurredAt: string;
+}
+
 interface MemberData {
   id: string;
   name: string;
@@ -46,6 +57,7 @@ interface MemberData {
   discordLinkedAt: string | null;
   activityConsentAt: string | null;
   activities: MemberActivityData[];
+  activityEvidence: DiscordActivityEvidenceData[];
 }
 
 type SortKey = "name" | "availability" | "workRegion" | "createdAt";
@@ -143,6 +155,20 @@ function isDeepDiscordActivity(summary: string): boolean {
   return summary.includes("[활동 딥다이브]");
 }
 
+function groupDiscordEvidenceByDate(evidence: DiscordActivityEvidenceData[]) {
+  return evidence.reduce<Record<string, DiscordActivityEvidenceData[]>>((groups, item) => {
+    const date = new Date(item.occurredAt).toLocaleDateString("ko-KR");
+    groups[date] = [...(groups[date] || []), item];
+    return groups;
+  }, {});
+}
+
+function formatMessageType(type: string): string {
+  if (type === "reply") return "댓글/답글";
+  if (type === "thread") return "스레드";
+  return "글/메시지";
+}
+
 export default function AdminPage() {
   const [authed, setAuthed] = useState(true);
   const [members, setMembers] = useState<MemberData[]>([]);
@@ -216,6 +242,7 @@ export default function AdminPage() {
   const selectClass = "border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900";
   const selectedData = members.find((d) => d.id === selected);
   const selectedDiscordActivity = splitDiscordActivitySummary(selectedData?.discordActivitySummary || null);
+  const selectedDiscordEvidenceByDate = groupDiscordEvidenceByDate(selectedData?.activityEvidence || []);
   const visibleDiscordLinked = members.filter((member) => member.discordUserId).length;
   const visibleDiscordSubmitted = members.filter((member) => !member.discordUserId && member.discordUsername).length;
   const visibleDiscordActive = members.filter((member) => member.lastDiscordActiveAt).length;
@@ -483,6 +510,40 @@ export default function AdminPage() {
                         <p>채널별 활동/최근 활동 타임라인은 아직 수집되지 않았습니다.</p>
                         <p>Discord에서 운영진이 <code className="rounded bg-white px-1 py-0.5 text-xs">/hire-sync-activity @사용자</code>를 실행하면 이 영역이 실제 활동 근거로 채워집니다.</p>
                       </div>
+                    )}
+                  </div>
+                </details>
+                <details className="mt-4 rounded-xl border border-zinc-200 bg-white" open={Boolean(selectedData.activityEvidence?.length)}>
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3 text-sm font-semibold text-zinc-900">
+                    <span className="flex items-center gap-2"><Activity className="h-4 w-4" /> Discord 활동 기록 보러가기</span>
+                    <span className="text-xs font-normal text-zinc-400">날짜별 활동 · 메시지 원문 발췌</span>
+                  </summary>
+                  <div className="border-t border-zinc-100 px-3 py-3 space-y-4">
+                    {selectedData.activityEvidence?.length ? (
+                      <>
+                        <p className="text-xs text-zinc-500">봇이 접근 가능한 채널에서 수집한 최근 메시지 발췌입니다. 전체 원문이 아니라 운영 검토에 필요한 최대 1,200자 발췌만 저장합니다.</p>
+                        {Object.entries(selectedDiscordEvidenceByDate).map(([date, items]) => (
+                          <div key={date} className="space-y-2">
+                            <p className="text-xs font-bold text-zinc-500">{date}</p>
+                            {items.map((item) => (
+                              <article key={item.id} className="rounded-lg border border-zinc-100 bg-zinc-50 p-3">
+                                <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
+                                  <span>#{item.channelName}</span>
+                                  <span>·</span>
+                                  <span>{formatMessageType(item.messageType)}</span>
+                                  <span>·</span>
+                                  <span>{formatDate(item.occurredAt)}</span>
+                                  {item.messageUrl ? <a className="ml-auto text-indigo-600 hover:underline" href={item.messageUrl} target="_blank" rel="noreferrer">Discord에서 열기</a> : null}
+                                </div>
+                                <p className="mt-2 text-xs font-semibold text-zinc-500">메시지 원문 발췌</p>
+                                <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-900">{item.contentExcerpt}</p>
+                              </article>
+                            ))}
+                          </div>
+                        ))}
+                      </>
+                    ) : (
+                      <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">아직 메시지 단위 활동 기록이 없습니다. Discord에서 운영진이 <code className="rounded bg-white px-1 py-0.5 text-xs">/hire-sync-activity @사용자</code>를 실행하면 날짜별 활동과 메시지 원문 발췌가 채워집니다.</p>
                     )}
                   </div>
                 </details>

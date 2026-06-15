@@ -157,3 +157,21 @@ test("admin auth survives refresh with httpOnly cookie", () => {
   assert.match(admin, /res\.status === 401/);
   assert.match(admin, /setAuthed\(false\)/);
 });
+
+test("Discord activity evidence stores message-level excerpts for admin drill-down", () => {
+  const schema = read("prisma/schema.prisma");
+  const syncRoute = read("src/app/api/discord/sync/route.ts");
+  const membersRoute = read("src/app/api/members/route.ts");
+  const admin = read("src/app/admin/page.tsx");
+
+  assert.match(schema, /model DiscordActivityEvidence/);
+  assert.match(schema, /messageId\s+String/);
+  assert.match(schema, /contentExcerpt\s+String\s+@db\.Text/);
+  assert.match(schema, /@@unique\(\[memberId, messageId\]\)/);
+  assert.match(syncRoute, /activityEvents/);
+  assert.match(syncRoute, /createMany/);
+  assert.match(membersRoute, /activityEvidence/);
+  assert.match(admin, /Discord 활동 기록 보러가기/);
+  assert.match(admin, /메시지 원문 발췌/);
+  assert.match(admin, /날짜별 활동/);
+});

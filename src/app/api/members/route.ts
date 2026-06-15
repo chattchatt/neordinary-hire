@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { verifyAuth, unauthorizedResponse } from "@/lib/auth";
 import { generateHireLinkCode } from "@/lib/hire-link-code";
-import { isMissingColumnError } from "@/lib/prisma-compat";
+import { isMissingColumnError, isMissingRelationError } from "@/lib/prisma-compat";
 
 const legacyMemberSelect = {
   id: true,
@@ -48,6 +48,7 @@ function withDiscordFallback(member: Record<string, unknown>) {
     discordLinkedAt: null,
     activityConsentAt: null,
     activities: [],
+    activityEvidence: [],
   };
 }
 
@@ -97,7 +98,10 @@ export async function GET(req: NextRequest) {
     const members = await prisma.member.findMany({
       where,
       orderBy: { [sortBy]: sortOrder },
-      include: { activities: { orderBy: { occurredAt: "desc" }, take: 10 } },
+      include: {
+        activities: { orderBy: { occurredAt: "desc" }, take: 10 },
+        activityEvidence: { orderBy: { occurredAt: "desc" }, take: 100 },
+      },
     });
 
     const total = await prisma.member.count();
@@ -113,7 +117,7 @@ export async function GET(req: NextRequest) {
       stats: { total, thisMonth, availableNow, discordLinked, discordActive },
     });
   } catch (error) {
-    if (!isMissingColumnError(error)) throw error;
+    if (!isMissingColumnError(error) && !isMissingRelationError(error)) throw error;
 
     const legacyWhere: Record<string, unknown> = { ...where };
     delete legacyWhere.discordUserId;
