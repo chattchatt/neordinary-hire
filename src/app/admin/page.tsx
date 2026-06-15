@@ -188,6 +188,7 @@ export default function AdminPage() {
 
   const selectClass = "border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900";
   const selectedData = members.find((d) => d.id === selected);
+  const visibleDiscordLinked = members.filter((member) => member.discordUserId).length;
 
   if (!authed) return <LoginGate onAuth={() => setAuthed(true)} />;
 
@@ -239,6 +240,20 @@ export default function AdminPage() {
           ))}
         </div>
 
+        <div className="mb-4 rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3">
+          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-semibold text-indigo-900">Discord 인증 정보 확인 위치</p>
+              <p className="text-sm text-indigo-800/80">
+                표의 Discord 컬럼에서 닉네임·연동 상태를 바로 보고, 행을 클릭하면 커뮤니티 신뢰 정보에서 서버 역할·활동 요약·최근 활동 로그까지 확인합니다.
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-indigo-700 bg-white border border-indigo-100 rounded-full px-3 py-1">
+              현재 목록 {visibleDiscordLinked}/{members.length}명 인증
+            </span>
+          </div>
+        </div>
+
         <div className="bg-white rounded-xl border border-zinc-200 p-4 mb-4">
           <div className="flex flex-wrap gap-3 items-center">
             <div className="flex-1 min-w-[200px] relative">
@@ -265,7 +280,7 @@ export default function AdminPage() {
             <button onClick={resetFilters} className="text-sm text-zinc-400 hover:text-zinc-900 transition-colors">초기화</button>
           </div>
           <p className="mt-3 text-sm text-zinc-500">
-            {loading ? "로딩 중..." : `${members.length}명의 인재`}
+            {loading ? "로딩 중..." : `${members.length}명의 인재 · Discord 인증 ${visibleDiscordLinked}명 · 행 클릭 시 상세 커뮤니티 신뢰 정보 확인`}
           </p>
         </div>
 
@@ -292,10 +307,23 @@ export default function AdminPage() {
                     <td className="px-4 py-3 font-medium text-zinc-900">{d.name}</td>
                     <td className="px-4 py-3"><span className="bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-md text-xs">{d.roles.join(", ")}</span></td>
                     <td className="px-4 py-3 text-zinc-600 max-w-[200px] truncate">{d.techStack}</td>
-                    <td className="px-4 py-3 text-zinc-500">
+                    <td className="px-4 py-3 text-zinc-500 min-w-[180px]">
                       {d.discordUserId ? (
-                        <span className="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md text-xs">{d.discordNickname || d.discordDisplayName || d.discordUsername}</span>
-                      ) : <span className="text-zinc-300">미연동</span>}
+                        <div className="space-y-1">
+                          <span className="inline-flex bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-md text-xs font-medium">
+                            인증 완료 · {d.discordNickname || d.discordDisplayName || d.discordUsername}
+                          </span>
+                          <p className="text-xs text-zinc-400">
+                            {d.discordRoles?.length ? d.discordRoles.slice(0, 3).join(", ") : "역할 미동기화"}
+                            {d.activities?.length ? ` · 활동 ${d.activities.length}건` : ""}
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="space-y-1">
+                          <span className="text-zinc-300">미인증</span>
+                          {d.hireLinkCode && <p className="text-xs text-zinc-300">등록 완료 페이지에서 선택 인증 가능</p>}
+                        </div>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-zinc-500">{d.experience || "—"}</td>
                     <td className="px-4 py-3">

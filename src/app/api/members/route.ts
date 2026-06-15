@@ -178,5 +178,5 @@ export async function POST(req: NextRequest) {
     throw error;
   }
 
-  return NextResponse.json({ success: true, member }, { status: 201 });
+  return NextResponse.json({ success: true, member, hireLinkCode: member.hireLinkCode }, { status: 201 });
 }

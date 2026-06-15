@@ -40,11 +40,17 @@ export default function RegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      const data = await res.json();
       if (res.ok) {
-        alert("등록이 완료되었습니다! 적합한 채용·프로젝트 기회 검토 대상에 포함됩니다.");
-        window.location.href = "/";
+        const hireLinkCode =
+          typeof data.hireLinkCode === "string"
+            ? data.hireLinkCode
+            : typeof data.member?.hireLinkCode === "string"
+              ? data.member.hireLinkCode
+              : "";
+        const codeParam = hireLinkCode ? `?code=${encodeURIComponent(hireLinkCode)}&profile=full` : "?profile=full";
+        window.location.href = `/register/quick/success${codeParam}`;
       } else {
-        const data = await res.json();
         alert("등록 실패: " + (data.error || "다시 시도해주세요."));
       }
     } catch {
@@ -87,6 +93,9 @@ export default function RegisterPage() {
           {/* Header */}
           <h1 className="text-3xl sm:text-4xl font-bold text-zinc-900">인재 등록</h1>
           <p className="mt-2 text-zinc-500">프로필을 등록하면 적합한 채용·프로젝트 기회 검토 대상에 포함됩니다.</p>
+          <p className="mt-2 text-xs text-zinc-400">
+            등록 완료 후 Discord 커뮤니티 인증을 선택하면 닉네임·서버 역할·활동 맥락까지 연결되어 매칭 신뢰도를 높일 수 있습니다.
+          </p>
 
           {/* Progress */}
           <div className="mt-8 flex gap-1.5">
