@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
     }
 
     const now = new Date();
-    const activitySummary = sanitize(body.activitySummary, 2000) || defaultActivitySummary;
+    const activitySummary = sanitize(body.activitySummary, 8000) || defaultActivitySummary;
     const occurredAt = parseOptionalDate(body.lastActiveAt) || now;
     const discordRoles = Array.isArray(body.discordRoles) ? sanitizeStringArray(body.discordRoles) : member.discordRoles;
     const updated = await prisma.member.update({

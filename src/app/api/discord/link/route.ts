@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     }
 
     const now = new Date();
-    const activitySummary = sanitize(body.activitySummary, 2000);
+    const activitySummary = sanitize(body.activitySummary, 8000);
     const updated = await prisma.member.update({
       where: { id: member.id },
       data: {

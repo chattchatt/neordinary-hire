@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Search, Download, Upload, X, ChevronUp, ChevronDown, Bookmark, Lock } from "lucide-react";
+import { Search, Download, Upload, X, ChevronUp, ChevronDown, Bookmark, Lock, Activity } from "lucide-react";
 import Image from "next/image";
 
 interface MemberActivityData {
@@ -118,6 +118,17 @@ function formatDate(value: string | null): string {
   return new Date(value).toLocaleString("ko-KR");
 }
 
+function splitDiscordActivitySummary(summary: string | null): { overview: string; depth: string } {
+  if (!summary) return { overview: "—", depth: "" };
+  const marker = "[활동 딥다이브]";
+  const markerIndex = summary.indexOf(marker);
+  if (markerIndex === -1) return { overview: summary, depth: summary };
+  return {
+    overview: summary.slice(0, markerIndex).trim() || "—",
+    depth: summary.slice(markerIndex + marker.length).trim(),
+  };
+}
+
 export default function AdminPage() {
   const [authed, setAuthed] = useState(true);
   const [members, setMembers] = useState<MemberData[]>([]);
@@ -190,6 +201,7 @@ export default function AdminPage() {
 
   const selectClass = "border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900";
   const selectedData = members.find((d) => d.id === selected);
+  const selectedDiscordActivity = splitDiscordActivitySummary(selectedData?.discordActivitySummary || null);
   const visibleDiscordLinked = members.filter((member) => member.discordUserId).length;
   const visibleDiscordSubmitted = members.filter((member) => !member.discordUserId && member.discordUsername).length;
   const visibleDiscordActive = members.filter((member) => member.lastDiscordActiveAt).length;
@@ -429,8 +441,26 @@ export default function AdminPage() {
                 </div>
                 <div className="mt-4">
                   <p className="text-xs text-zinc-400 mb-1">활동 요약</p>
-                  <p className="text-sm text-zinc-900 whitespace-pre-wrap">{selectedData.discordActivitySummary || "—"}</p>
+                  <p className="text-sm text-zinc-900 whitespace-pre-wrap">{selectedDiscordActivity.overview}</p>
                 </div>
+                <details className="mt-4 rounded-xl border border-indigo-100 bg-white" open={Boolean(selectedDiscordActivity.depth)}>
+                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3 text-sm font-semibold text-indigo-800">
+                    <span className="flex items-center gap-2"><Activity className="h-4 w-4" /> 활동 딥다이브</span>
+                    <span className="text-xs font-normal text-zinc-400">채널별 활동 · 최근 활동 타임라인 · 수집 범위</span>
+                  </summary>
+                  <div className="border-t border-indigo-50 px-3 py-3 space-y-3">
+                    <div>
+                      <p className="text-xs font-semibold text-zinc-500 mb-1">채널별 활동</p>
+                      <p className="text-sm text-zinc-800 whitespace-pre-wrap">{selectedDiscordActivity.depth || "동기화된 채널별 활동이 없습니다."}</p>
+                    </div>
+                    <div className="grid gap-2 rounded-lg bg-indigo-50/60 p-3 text-xs text-zinc-600">
+                      <p className="font-semibold text-indigo-800">운영 판단 포인트</p>
+                      <p>· 최근 활동 타임라인에서 실제 커뮤니티 참여의 최신성을 봅니다.</p>
+                      <p>· 채널별 활동에서 관심사/기여 영역을 봅니다.</p>
+                      <p>· 수집 범위에서 봇 권한 때문에 빠진 채널이 있는지 확인합니다.</p>
+                    </div>
+                  </div>
+                </details>
                 <div className="mt-4">
                   <p className="text-xs text-zinc-400 mb-2">최근 활동 로그</p>
                   {selectedData.activities?.length ? (
@@ -438,7 +468,7 @@ export default function AdminPage() {
                       {selectedData.activities.map((activity) => (
                         <li key={activity.id} className="rounded-lg bg-white border border-indigo-100 px-3 py-2">
                           <p className="text-xs text-zinc-400">{activity.source} · {activity.type} · {formatDate(activity.occurredAt)}</p>
-                          <p className="text-sm text-zinc-800 mt-1">{activity.summary}</p>
+                          <p className="text-sm text-zinc-800 mt-1 whitespace-pre-wrap">{activity.summary}</p>
                         </li>
                       ))}
                     </ul>

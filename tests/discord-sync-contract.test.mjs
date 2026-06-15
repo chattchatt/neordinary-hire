@@ -50,6 +50,7 @@ test("Discord sync can auto-link a pending profile by submitted handle", () => {
   assert.match(syncRoute, /자동 매칭 후보가 여러 명/);
   assert.match(syncRoute, /discordLinkedAt: member.discordLinkedAt \|\| now/);
   assert.match(syncRoute, /activityType = "auto-link"/);
+  assert.match(syncRoute, /sanitize\(body\.activitySummary, 8000\)/);
 });
 
 test("quick registration accepts Discord handle without forcing bot commands", () => {
@@ -109,7 +110,10 @@ test("admin dashboard exposes Discord community trust information", () => {
   assert.match(admin, /자동 매칭 대기/);
   assert.match(admin, /활동 활용 동의/);
   assert.match(admin, /활동 요약/);
-  assert.match(admin, /커뮤니티 신뢰 신호/);
+  assert.match(admin, /활동 딥다이브/);
+  assert.match(admin, /채널별 활동/);
+  assert.match(admin, /최근 활동 타임라인/);
+  assert.match(admin, /수집 범위/);
   assert.match(admin, /메시지 원문은 저장하지 않고 요약\/메타데이터만 확인/);
 });
 
