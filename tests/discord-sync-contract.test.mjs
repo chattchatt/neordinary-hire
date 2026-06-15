@@ -109,6 +109,27 @@ test("admin dashboard exposes Discord community trust information", () => {
   assert.match(admin, /자동 매칭 대기/);
   assert.match(admin, /활동 활용 동의/);
   assert.match(admin, /활동 요약/);
+  assert.match(admin, /커뮤니티 신뢰 신호/);
+  assert.match(admin, /메시지 원문은 저장하지 않고 요약\/메타데이터만 확인/);
+});
+
+test("admin can filter Discord trust status and activity sync state", () => {
+  const membersRoute = read("src/app/api/members/route.ts");
+  const exportRoute = read("src/app/api/members/export/route.ts");
+  const admin = read("src/app/admin/page.tsx");
+
+  assert.match(membersRoute, /discordStatus/);
+  assert.match(membersRoute, /verified/);
+  assert.match(membersRoute, /pending/);
+  assert.match(membersRoute, /active/);
+  assert.match(membersRoute, /discordActive/);
+  assert.match(exportRoute, /discordStatus/);
+  assert.match(admin, /Discord 전체/);
+  assert.match(admin, /인증 완료/);
+  assert.match(admin, /자동 매칭 대기/);
+  assert.match(admin, /최근 활동 있음/);
+  assert.match(admin, /미연동/);
+  assert.match(admin, /stats\.discordActive/);
 });
 
 test("admin auth survives refresh with httpOnly cookie", () => {

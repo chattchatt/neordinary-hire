@@ -121,12 +121,12 @@ function formatDate(value: string | null): string {
 export default function AdminPage() {
   const [authed, setAuthed] = useState(true);
   const [members, setMembers] = useState<MemberData[]>([]);
-  const [stats, setStats] = useState({ total: 0, thisMonth: 0, availableNow: 0, discordLinked: 0 });
+  const [stats, setStats] = useState({ total: 0, thisMonth: 0, availableNow: 0, discordLinked: 0, discordActive: 0 });
   const [schemaStatus, setSchemaStatus] = useState<string | null>(null);
   const [loadError, setLoadError] = useState("");
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [filters, setFilters] = useState({ role: "", experience: "", availability: "", community: "" });
+  const [filters, setFilters] = useState({ role: "", experience: "", availability: "", community: "", discordStatus: "" });
   const [sortKey, setSortKey] = useState<SortKey>("createdAt");
   const [sortAsc, setSortAsc] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
@@ -141,6 +141,7 @@ export default function AdminPage() {
     if (filters.experience) params.set("experience", filters.experience);
     if (filters.availability) params.set("availability", filters.availability);
     if (filters.community) params.set("community", filters.community);
+    if (filters.discordStatus) params.set("discordStatus", filters.discordStatus);
     params.set("sortBy", sortKey);
     params.set("sortOrder", sortAsc ? "asc" : "desc");
 
@@ -155,7 +156,7 @@ export default function AdminPage() {
       if (!res.ok) throw new Error(`Failed to fetch members: ${res.status}`);
       const data = await res.json();
       setMembers(data.members || []);
-      setStats(data.stats || { total: 0, thisMonth: 0, availableNow: 0, discordLinked: 0 });
+      setStats(data.stats || { total: 0, thisMonth: 0, availableNow: 0, discordLinked: 0, discordActive: 0 });
       setSchemaStatus(data.schemaStatus || null);
       setLoadError("");
     } catch (error) {
@@ -179,10 +180,11 @@ export default function AdminPage() {
     if (filters.experience) params.set("experience", filters.experience);
     if (filters.availability) params.set("availability", filters.availability);
     if (filters.community) params.set("community", filters.community);
+    if (filters.discordStatus) params.set("discordStatus", filters.discordStatus);
     window.open(`/api/members/export?${params}`, "_blank");
   };
 
-  const resetFilters = () => { setFilters({ role: "", experience: "", availability: "", community: "" }); setSearch(""); };
+  const resetFilters = () => { setFilters({ role: "", experience: "", availability: "", community: "", discordStatus: "" }); setSearch(""); };
 
   const SortIcon = ({ k }: { k: SortKey }) => sortKey === k ? (sortAsc ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : null;
 
@@ -190,6 +192,7 @@ export default function AdminPage() {
   const selectedData = members.find((d) => d.id === selected);
   const visibleDiscordLinked = members.filter((member) => member.discordUserId).length;
   const visibleDiscordSubmitted = members.filter((member) => !member.discordUserId && member.discordUsername).length;
+  const visibleDiscordActive = members.filter((member) => member.lastDiscordActiveAt).length;
 
   if (!authed) return <LoginGate onAuth={() => setAuthed(true)} />;
 
@@ -227,12 +230,13 @@ export default function AdminPage() {
           </div>
         )}
 
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-6">
           {[
             { label: "등록 인재", value: stats.total, suffix: "명" },
             { label: "이번 달 신규", value: stats.thisMonth, suffix: "명" },
             { label: "즉시 가용", value: stats.availableNow, suffix: "명" },
             { label: "Discord 연결", value: stats.discordLinked, suffix: "명" },
+            { label: "최근 활동 동기화", value: stats.discordActive, suffix: "명" },
           ].map((s) => (
             <div key={s.label} className="bg-white rounded-xl border border-zinc-200 p-5">
               <p className="text-sm text-zinc-400">{s.label}</p>
@@ -250,7 +254,7 @@ export default function AdminPage() {
               </p>
             </div>
             <span className="text-xs font-semibold text-indigo-700 bg-white border border-indigo-100 rounded-full px-3 py-1">
-              현재 목록 {visibleDiscordLinked}명 인증 · {visibleDiscordSubmitted}명 입력/자동 매칭 대기
+              현재 목록 {visibleDiscordLinked}명 인증 · {visibleDiscordSubmitted}명 입력/자동 매칭 대기 · {visibleDiscordActive}명 최근 활동 있음
             </span>
           </div>
         </div>
@@ -278,10 +282,17 @@ export default function AdminPage() {
               <option value="UMC">UMC</option>
               <option value="CMC">CMC</option>
             </select>
+            <select className={selectClass} value={filters.discordStatus} onChange={(e) => setFilters({ ...filters, discordStatus: e.target.value })}>
+              <option value="">Discord 전체</option>
+              <option value="verified">인증 완료</option>
+              <option value="pending">자동 매칭 대기</option>
+              <option value="active">최근 활동 있음</option>
+              <option value="unlinked">미연동</option>
+            </select>
             <button onClick={resetFilters} className="text-sm text-zinc-400 hover:text-zinc-900 transition-colors">초기화</button>
           </div>
           <p className="mt-3 text-sm text-zinc-500">
-            {loading ? "로딩 중..." : `${members.length}명의 인재 · Discord 인증 ${visibleDiscordLinked}명 · 입력/자동 매칭 대기 ${visibleDiscordSubmitted}명 · 행 클릭 시 상세 커뮤니티 신뢰 정보 확인`}
+            {loading ? "로딩 중..." : `${members.length}명의 인재 · Discord 인증 ${visibleDiscordLinked}명 · 입력/자동 매칭 대기 ${visibleDiscordSubmitted}명 · 최근 활동 ${visibleDiscordActive}명 · 행 클릭 시 상세 커뮤니티 신뢰 정보 확인`}
           </p>
         </div>
 
@@ -316,7 +327,7 @@ export default function AdminPage() {
                           </span>
                           <p className="text-xs text-zinc-400">
                             {d.discordRoles?.length ? d.discordRoles.slice(0, 3).join(", ") : "역할 미동기화"}
-                            {d.activities?.length ? ` · 활동 ${d.activities.length}건` : ""}
+                            {d.lastDiscordActiveAt ? " · 최근 활동 있음" : d.activities?.length ? ` · 활동 ${d.activities.length}건` : ""}
                           </p>
                         </div>
                       ) : d.discordUsername ? (
@@ -400,6 +411,17 @@ export default function AdminPage() {
                   <div><p className="text-xs text-zinc-400">서버 합류</p><p className="text-zinc-900">{formatDate(selectedData.discordJoinedAt)}</p></div>
                   <div><p className="text-xs text-zinc-400">최근 동기화</p><p className="text-zinc-900">{formatDate(selectedData.lastDiscordActiveAt)}</p></div>
                   <div><p className="text-xs text-zinc-400">활동 활용 동의</p><p className="text-zinc-900">{formatDate(selectedData.activityConsentAt)}</p></div>
+                </div>
+                <div className="mt-4 rounded-xl border border-indigo-100 bg-white px-3 py-3">
+                  <p className="text-xs font-semibold text-indigo-700 mb-2">커뮤니티 신뢰 신호</p>
+                  <ul className="space-y-1 text-xs text-zinc-600">
+                    <li>{selectedData.discordUserId ? "✓ Discord 계정 인증 완료" : "• Discord 계정 매칭 전"}</li>
+                    <li>{selectedData.discordRoles?.length ? `✓ 서버 역할 ${selectedData.discordRoles.length}개 동기화` : "• 서버 역할 미동기화"}</li>
+                    <li>{selectedData.discordJoinedAt ? `✓ 서버 합류일 확인: ${formatDate(selectedData.discordJoinedAt)}` : "• 서버 합류일 미확인"}</li>
+                    <li>{selectedData.lastDiscordActiveAt ? `✓ 최근 활동 동기화: ${formatDate(selectedData.lastDiscordActiveAt)}` : "• 최근 활동 동기화 전"}</li>
+                    <li>{selectedData.activityConsentAt ? "✓ 활동 활용 동의 확인" : "• 활동 활용 동의 미확인"}</li>
+                  </ul>
+                  <p className="mt-2 text-xs text-zinc-400">메시지 원문은 저장하지 않고 요약/메타데이터만 확인합니다.</p>
                 </div>
                 <div className="mt-4">
                   <p className="text-xs text-zinc-400 mb-1">역할</p>

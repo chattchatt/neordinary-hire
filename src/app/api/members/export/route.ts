@@ -38,6 +38,7 @@ export async function GET(req: NextRequest) {
     const availability = searchParams.get("availability") || "";
     const community = searchParams.get("community") || "";
     const region = searchParams.get("region") || "";
+    const discordStatus = searchParams.get("discordStatus") || "";
 
     const where: Record<string, unknown> = {};
     if (role) where.roles = { has: role };
@@ -45,6 +46,16 @@ export async function GET(req: NextRequest) {
     if (availability) where.availability = availability;
     if (community) where.communityType = community;
     if (region) where.workRegion = { contains: region, mode: "insensitive" };
+    if (discordStatus === "verified") where.discordUserId = { not: null };
+    if (discordStatus === "pending") {
+      where.discordUserId = null;
+      where.discordUsername = { not: null };
+    }
+    if (discordStatus === "active") where.lastDiscordActiveAt = { not: null };
+    if (discordStatus === "unlinked") {
+      where.discordUserId = null;
+      where.discordUsername = null;
+    }
 
     let members: ExportMember[];
     let hasDiscordSchema = true;
@@ -53,8 +64,12 @@ export async function GET(req: NextRequest) {
     } catch (error) {
       if (!isMissingColumnError(error)) throw error;
       hasDiscordSchema = false;
+      const legacyWhere: Record<string, unknown> = { ...where };
+      delete legacyWhere.discordUserId;
+      delete legacyWhere.discordUsername;
+      delete legacyWhere.lastDiscordActiveAt;
       members = await prisma.member.findMany({
-        where,
+        where: legacyWhere,
         orderBy: { createdAt: "desc" },
         select: {
           id: true,

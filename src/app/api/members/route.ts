@@ -61,6 +61,7 @@ export async function GET(req: NextRequest) {
   const availability = searchParams.get("availability") || "";
   const community = searchParams.get("community") || "";
   const region = searchParams.get("region") || "";
+  const discordStatus = searchParams.get("discordStatus") || "";
   const sortBy = searchParams.get("sortBy") || "createdAt";
   const sortOrder = searchParams.get("sortOrder") === "asc" ? "asc" : "desc";
 
@@ -81,6 +82,16 @@ export async function GET(req: NextRequest) {
   if (availability) where.availability = availability;
   if (community) where.communityType = community;
   if (region) where.workRegion = { contains: region, mode: "insensitive" };
+  if (discordStatus === "verified") where.discordUserId = { not: null };
+  if (discordStatus === "pending") {
+    where.discordUserId = null;
+    where.discordUsername = { not: null };
+  }
+  if (discordStatus === "active") where.lastDiscordActiveAt = { not: null };
+  if (discordStatus === "unlinked") {
+    where.discordUserId = null;
+    where.discordUsername = null;
+  }
 
   try {
     const members = await prisma.member.findMany({
@@ -95,15 +106,19 @@ export async function GET(req: NextRequest) {
     });
     const availableNow = await prisma.member.count({ where: { availability: "즉시" } });
     const discordLinked = await prisma.member.count({ where: { discordUserId: { not: null } } });
+    const discordActive = await prisma.member.count({ where: { lastDiscordActiveAt: { not: null } } });
 
     return NextResponse.json({
       members,
-      stats: { total, thisMonth, availableNow, discordLinked },
+      stats: { total, thisMonth, availableNow, discordLinked, discordActive },
     });
   } catch (error) {
     if (!isMissingColumnError(error)) throw error;
 
     const legacyWhere: Record<string, unknown> = { ...where };
+    delete legacyWhere.discordUserId;
+    delete legacyWhere.discordUsername;
+    delete legacyWhere.lastDiscordActiveAt;
     if (search) {
       legacyWhere.OR = [
         { name: { contains: search, mode: "insensitive" } },
@@ -126,7 +141,7 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       members: members.map(withDiscordFallback),
-      stats: { total, thisMonth, availableNow, discordLinked: 0 },
+      stats: { total, thisMonth, availableNow, discordLinked: 0, discordActive: 0 },
       schemaStatus: "discord_migration_required",
     });
   }
