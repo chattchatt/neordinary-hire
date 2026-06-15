@@ -380,7 +380,7 @@ export default function AdminPage() {
                           </span>
                           <p className="text-xs text-zinc-400">
                             {d.discordRoles?.length ? d.discordRoles.slice(0, 3).join(", ") : "역할 미동기화"}
-                            {d.lastDiscordActiveAt ? " · 최근 활동 있음" : d.activities?.length ? ` · 활동 ${d.activities.length}건` : ""}
+                            {d.activityEvidence?.length ? ` · 메시지 증거 ${d.activityEvidence.length}건` : d.lastDiscordActiveAt ? " · 요약 동기화·원문 대기" : d.activities?.length ? ` · 활동 ${d.activities.length}건` : ""}
                           </p>
                         </div>
                       ) : d.discordUsername ? (
@@ -474,7 +474,7 @@ export default function AdminPage() {
                     <li>{selectedData.lastDiscordActiveAt ? `✓ 최근 활동 동기화: ${formatDate(selectedData.lastDiscordActiveAt)}` : "• 최근 활동 동기화 전"}</li>
                     <li>{selectedData.activityConsentAt ? "✓ 활동 활용 동의 확인" : "• 활동 활용 동의 미확인"}</li>
                   </ul>
-                  <p className="mt-2 text-xs text-zinc-400">메시지 원문은 저장하지 않고 요약/메타데이터만 확인합니다.</p>
+                  <p className="mt-2 text-xs text-zinc-400">메시지 원문 발췌는 봇이 접근 가능한 채널에서 새 활동을 감지하거나 백필 동기화가 실행된 경우에만 표시됩니다.</p>
                 </div>
                 <div className="mt-4">
                   <p className="text-xs text-zinc-400 mb-1">역할</p>
@@ -487,19 +487,19 @@ export default function AdminPage() {
                 <details className="mt-4 rounded-xl border border-indigo-100 bg-white" open={selectedDiscordActivity.hasDepth}>
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3 text-sm font-semibold text-indigo-800">
                     <span className="flex items-center gap-2"><Activity className="h-4 w-4" /> 활동 딥다이브</span>
-                    <span className="text-xs font-normal text-zinc-400">{selectedDiscordActivity.hasDepth ? "채널별 활동 · 최근 활동 타임라인 · 수집 범위" : "아직 활동 상세 수집 전"}</span>
+                    <span className="text-xs font-normal text-zinc-400">{selectedData.activityEvidence?.length ? `메시지 증거 ${selectedData.activityEvidence.length}건` : selectedDiscordActivity.hasDepth ? "요약 동기화 완료 · 원문 증거 대기" : "자동 수집 대기"}</span>
                   </summary>
                   <div className="border-t border-indigo-50 px-3 py-3 space-y-3">
                     {selectedDiscordActivity.hasDepth ? (
                       <>
                         <div>
-                          <p className="text-xs font-semibold text-zinc-500 mb-1">채널별 활동 · 최근 활동 타임라인 · 수집 범위</p>
+                          <p className="text-xs font-semibold text-zinc-500 mb-1">활동 요약 · 최근 활동 타임라인 · 수집 범위</p>
                           <p className="text-sm text-zinc-800 whitespace-pre-wrap">{selectedDiscordActivity.depth}</p>
                         </div>
                         <div className="grid gap-2 rounded-lg bg-indigo-50/60 p-3 text-xs text-zinc-600">
                           <p className="font-semibold text-indigo-800">운영 판단 포인트</p>
                           <p>· 최근 활동 타임라인에서 실제 커뮤니티 참여의 최신성을 봅니다.</p>
-                          <p>· 채널별 활동에서 관심사/기여 영역을 봅니다.</p>
+                          <p>· 메시지 증거가 쌓이면 채널/주제/댓글 맥락에서 관심사와 기여 영역을 봅니다.</p>
                           <p>· 수집 범위에서 봇 권한 때문에 빠진 채널이 있는지 확인합니다.</p>
                         </div>
                       </>
@@ -508,7 +508,7 @@ export default function AdminPage() {
                         <p className="font-semibold">아직 활동 상세 수집 전입니다.</p>
                         <p>이 사람은 Discord 계정 매칭만 완료된 상태입니다.</p>
                         <p>채널별 활동/최근 활동 타임라인은 아직 수집되지 않았습니다.</p>
-                        <p>Discord에서 운영진이 <code className="rounded bg-white px-1 py-0.5 text-xs">/hire-sync-activity @사용자</code>를 실행하면 이 영역이 실제 활동 근거로 채워집니다.</p>
+                        <p>이제부터 이 사용자가 봇이 볼 수 있는 Discord 채널에 글을 쓰면 자동으로 메시지 증거가 쌓입니다. 과거 활동은 운영진 백필 동기화가 실행된 경우에만 표시됩니다.</p>
                       </div>
                     )}
                   </div>
@@ -521,7 +521,7 @@ export default function AdminPage() {
                   <div className="border-t border-zinc-100 px-3 py-3 space-y-4">
                     {selectedData.activityEvidence?.length ? (
                       <>
-                        <p className="text-xs text-zinc-500">봇이 접근 가능한 채널에서 수집한 최근 메시지 발췌입니다. 전체 원문이 아니라 운영 검토에 필요한 최대 1,200자 발췌만 저장합니다.</p>
+                        <p className="text-xs text-zinc-500">봇이 접근 가능한 채널에서 자동 수집한 최근 메시지 발췌입니다. 전체 원문이 아니라 운영 검토에 필요한 최대 1,200자 발췌만 저장합니다.</p>
                         {Object.entries(selectedDiscordEvidenceByDate).map(([date, items]) => (
                           <div key={date} className="space-y-2">
                             <p className="text-xs font-bold text-zinc-500">{date}</p>
@@ -543,7 +543,7 @@ export default function AdminPage() {
                         ))}
                       </>
                     ) : (
-                      <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">아직 메시지 단위 활동 기록이 없습니다. Discord에서 운영진이 <code className="rounded bg-white px-1 py-0.5 text-xs">/hire-sync-activity @사용자</code>를 실행하면 날짜별 활동과 메시지 원문 발췌가 채워집니다.</p>
+                      <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">아직 메시지 단위 활동 기록이 없습니다. 앞으로 이 사용자가 봇이 접근 가능한 Discord 채널에 글을 쓰면 자동으로 날짜별 활동과 메시지 원문 발췌가 채워집니다. 과거 메시지는 백필 동기화를 실행한 경우에만 표시됩니다.</p>
                     )}
                   </div>
                 </details>
