@@ -119,7 +119,7 @@ function formatDate(value: string | null): string {
 }
 
 export default function AdminPage() {
-  const [authed, setAuthed] = useState(false);
+  const [authed, setAuthed] = useState(true);
   const [members, setMembers] = useState<MemberData[]>([]);
   const [stats, setStats] = useState({ total: 0, thisMonth: 0, availableNow: 0, discordLinked: 0 });
   const [schemaStatus, setSchemaStatus] = useState<string | null>(null);
@@ -131,12 +131,6 @@ export default function AdminPage() {
   const [sortAsc, setSortAsc] = useState(false);
   const [selected, setSelected] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
-
-  useEffect(() => {
-    if (document.cookie.includes("admin_token=")) {
-      setAuthed(true);
-    }
-  }, []);
 
   const fetchMembers = useCallback(async () => {
     if (!authed) return;
@@ -152,6 +146,12 @@ export default function AdminPage() {
 
     try {
       const res = await fetch(`/api/members?${params}`);
+      if (res.status === 401) {
+        setAuthed(false);
+        setMembers([]);
+        setLoadError("");
+        return;
+      }
       if (!res.ok) throw new Error(`Failed to fetch members: ${res.status}`);
       const data = await res.json();
       setMembers(data.members || []);

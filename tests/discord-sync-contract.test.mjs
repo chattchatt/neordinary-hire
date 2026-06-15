@@ -110,3 +110,13 @@ test("admin dashboard exposes Discord community trust information", () => {
   assert.match(admin, /활동 활용 동의/);
   assert.match(admin, /활동 요약/);
 });
+
+test("admin auth survives refresh with httpOnly cookie", () => {
+  const admin = read("src/app/admin/page.tsx");
+  const authRoute = read("src/app/api/auth/route.ts");
+  assert.match(authRoute, /httpOnly:\s*true/);
+  assert.doesNotMatch(admin, /document\.cookie/);
+  assert.match(admin, /useState\(true\)/);
+  assert.match(admin, /res\.status === 401/);
+  assert.match(admin, /setAuthed\(false\)/);
+});
