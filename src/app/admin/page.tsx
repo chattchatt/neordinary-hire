@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Search, Download, Upload, X, ChevronUp, ChevronDown, Bookmark, Lock, Activity } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Search, Download, Upload, X, ChevronUp, ChevronDown, Lock } from "lucide-react";
 import Image from "next/image";
 
 interface MemberActivityData {
@@ -125,51 +126,8 @@ function LoginGate({ onAuth }: { onAuth: () => void }) {
   );
 }
 
-function formatDate(value: string | null): string {
-  if (!value) return "—";
-  return new Date(value).toLocaleString("ko-KR");
-}
-
-function splitDiscordActivitySummary(summary: string | null): { overview: string; depth: string; hasDepth: boolean } {
-  if (!summary) return { overview: "—", depth: "", hasDepth: false };
-  const marker = "[활동 딥다이브]";
-  const markerIndex = summary.indexOf(marker);
-  if (markerIndex === -1) return { overview: summary, depth: "", hasDepth: false };
-  return {
-    overview: summary.slice(0, markerIndex).trim() || "—",
-    depth: summary.slice(markerIndex + marker.length).trim(),
-    hasDepth: true,
-  };
-}
-
-function formatActivityType(type: string): string {
-  const labels: Record<string, string> = {
-    "auto-link": "계정 자동 매칭",
-    link: "직접 인증",
-    sync: "프로필/활동 동기화",
-  };
-  return labels[type] || type;
-}
-
-function isDeepDiscordActivity(summary: string): boolean {
-  return summary.includes("[활동 딥다이브]");
-}
-
-function groupDiscordEvidenceByDate(evidence: DiscordActivityEvidenceData[]) {
-  return evidence.reduce<Record<string, DiscordActivityEvidenceData[]>>((groups, item) => {
-    const date = new Date(item.occurredAt).toLocaleDateString("ko-KR");
-    groups[date] = [...(groups[date] || []), item];
-    return groups;
-  }, {});
-}
-
-function formatMessageType(type: string): string {
-  if (type === "reply") return "댓글/답글";
-  if (type === "thread") return "스레드";
-  return "글/메시지";
-}
-
 export default function AdminPage() {
+  const router = useRouter();
   const [authed, setAuthed] = useState(true);
   const [members, setMembers] = useState<MemberData[]>([]);
   const [stats, setStats] = useState({ total: 0, thisMonth: 0, availableNow: 0, discordLinked: 0, discordActive: 0 });
@@ -180,7 +138,6 @@ export default function AdminPage() {
   const [filters, setFilters] = useState({ role: "", experience: "", availability: "", community: "", discordStatus: "" });
   const [sortKey, setSortKey] = useState<SortKey>("createdAt");
   const [sortAsc, setSortAsc] = useState(false);
-  const [selected, setSelected] = useState<string | null>(null);
   const [showUpload, setShowUpload] = useState(false);
 
   const fetchMembers = useCallback(async () => {
@@ -240,9 +197,6 @@ export default function AdminPage() {
   const SortIcon = ({ k }: { k: SortKey }) => sortKey === k ? (sortAsc ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />) : null;
 
   const selectClass = "border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900";
-  const selectedData = members.find((d) => d.id === selected);
-  const selectedDiscordActivity = splitDiscordActivitySummary(selectedData?.discordActivitySummary || null);
-  const selectedDiscordEvidenceByDate = groupDiscordEvidenceByDate(selectedData?.activityEvidence || []);
   const visibleDiscordLinked = members.filter((member) => member.discordUserId).length;
   const visibleDiscordSubmitted = members.filter((member) => !member.discordUserId && member.discordUsername).length;
   const visibleDiscordActive = members.filter((member) => member.lastDiscordActiveAt).length;
@@ -303,7 +257,7 @@ export default function AdminPage() {
             <div>
               <p className="text-sm font-semibold text-indigo-900">Discord 인증 정보 확인 위치</p>
               <p className="text-sm text-indigo-800/80">
-                표의 Discord 컬럼에서 닉네임·연동 상태를 바로 보고, 행을 클릭하면 커뮤니티 신뢰 정보에서 서버 역할·활동 요약·최근 활동 로그까지 확인합니다.
+                표의 Discord 컬럼에서 닉네임·연동 상태를 빠르게 보고, 행을 클릭하면 별도 상세 페이지에서 서버 역할·채널별 활동·날짜별 메시지 증거까지 깊게 확인합니다.
               </p>
             </div>
             <span className="text-xs font-semibold text-indigo-700 bg-white border border-indigo-100 rounded-full px-3 py-1">
@@ -345,7 +299,7 @@ export default function AdminPage() {
             <button onClick={resetFilters} className="text-sm text-zinc-400 hover:text-zinc-900 transition-colors">초기화</button>
           </div>
           <p className="mt-3 text-sm text-zinc-500">
-            {loading ? "로딩 중..." : `${members.length}명의 인재 · Discord 인증 ${visibleDiscordLinked}명 · 입력/자동 매칭 대기 ${visibleDiscordSubmitted}명 · 최근 활동 ${visibleDiscordActive}명 · 행 클릭 시 상세 커뮤니티 신뢰 정보 확인`}
+            {loading ? "로딩 중..." : `${members.length}명의 인재 · Discord 인증 ${visibleDiscordLinked}명 · 입력/자동 매칭 대기 ${visibleDiscordSubmitted}명 · 최근 활동 ${visibleDiscordActive}명 · 행 클릭 시 별도 상세 페이지에서 활동 딥다이브 확인`}
           </p>
         </div>
 
@@ -368,7 +322,7 @@ export default function AdminPage() {
                 {members.length === 0 && !loading ? (
                   <tr><td colSpan={8} className="px-4 py-12 text-center text-zinc-400">등록된 인재가 없습니다. 멤버가 등록하면 여기에 표시됩니다.</td></tr>
                 ) : members.map((d) => (
-                  <tr key={d.id} className="border-b border-zinc-50 hover:bg-zinc-50/50 cursor-pointer transition-colors" onClick={() => setSelected(d.id)}>
+                  <tr key={d.id} className="border-b border-zinc-50 hover:bg-zinc-50/50 cursor-pointer transition-colors" onClick={() => router.push(`/admin/members/${d.id}`)} title="상세 페이지 열기">
                     <td className="px-4 py-3 font-medium text-zinc-900">{d.name}</td>
                     <td className="px-4 py-3"><span className="bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-md text-xs">{d.roles.join(", ")}</span></td>
                     <td className="px-4 py-3 text-zinc-600 max-w-[200px] truncate">{d.techStack}</td>
@@ -410,167 +364,6 @@ export default function AdminPage() {
           </div>
         </div>
       </div>
-
-      {selectedData && (
-        <div className="fixed inset-0 z-50 flex justify-end">
-          <div className="absolute inset-0 bg-black/20" onClick={() => setSelected(null)} />
-          <div className="relative w-full max-w-lg bg-white shadow-2xl overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b border-zinc-100 px-6 py-4 flex items-center justify-between">
-              <h2 className="text-lg font-bold text-zinc-900">{selectedData.name}</h2>
-              <div className="flex items-center gap-2">
-                <button className="p-2 hover:bg-zinc-100 rounded-lg transition-colors"><Bookmark className="w-4 h-4" /></button>
-                <button onClick={() => setSelected(null)} className="p-2 hover:bg-zinc-100 rounded-lg transition-colors"><X className="w-4 h-4" /></button>
-              </div>
-            </div>
-            <div className="p-6 space-y-6">
-              {[
-                { label: "소속 구분", value: selectedData.affiliation },
-                { label: "소속", value: selectedData.organization },
-                { label: "연락처", value: `${selectedData.phone} / ${selectedData.email}` },
-                { label: "주요 역할", value: selectedData.roles.join(", ") },
-                { label: "기술 스택", value: selectedData.techStack },
-                { label: "보유 자격증", value: selectedData.certifications },
-                { label: "총 경력", value: selectedData.experience },
-                { label: "프로젝트 경력", value: selectedData.projectExperience },
-                { label: "커뮤니티", value: selectedData.communityType ? `${selectedData.communityType} ${selectedData.generation || ""}기` : null },
-                { label: "가용 시기", value: selectedData.availability },
-                { label: "희망 근무 형태", value: selectedData.workType },
-                { label: "근무 가능 지역", value: selectedData.workRegion },
-                { label: "포트폴리오", value: selectedData.portfolioUrl },
-                { label: "자기소개", value: selectedData.bio },
-                { label: "기타", value: selectedData.notes },
-              ].map((item) => (
-                <div key={item.label}>
-                  <p className="text-xs text-zinc-400 mb-1">{item.label}</p>
-                  <p className="text-sm text-zinc-900">{item.value || "—"}</p>
-                </div>
-              ))}
-
-              <section className="rounded-2xl border border-indigo-100 bg-indigo-50/40 p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <div>
-                    <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">커뮤니티 신뢰 정보</p>
-                    <p className="text-sm text-zinc-600 mt-1">등록폼 입력값과 NERDY Discord 봇으로 자동 매칭된 닉네임·역할·활동 히스토리입니다.</p>
-                  </div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${selectedData.discordUserId ? "bg-indigo-600 text-white" : selectedData.discordUsername ? "bg-amber-100 text-amber-700" : "bg-white text-zinc-400"}`}>
-                    {selectedData.discordUserId ? "인증 완료" : selectedData.discordUsername ? "입력됨/자동 매칭 대기" : "미입력"}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div><p className="text-xs text-zinc-400">Discord 닉네임</p><p className="text-zinc-900">{selectedData.discordNickname || selectedData.discordUsername || "—"}</p></div>
-                  <div><p className="text-xs text-zinc-400">표시명</p><p className="text-zinc-900">{selectedData.discordDisplayName || "—"}</p></div>
-                  <div><p className="text-xs text-zinc-400">사용자명</p><p className="text-zinc-900">{selectedData.discordUsername || "—"}</p></div>
-                  <div><p className="text-xs text-zinc-400">Discord ID</p><p className="text-zinc-900 break-all">{selectedData.discordUserId || (selectedData.discordUsername ? "매칭 전" : "—")}</p></div>
-                  <div><p className="text-xs text-zinc-400">서버 합류</p><p className="text-zinc-900">{formatDate(selectedData.discordJoinedAt)}</p></div>
-                  <div><p className="text-xs text-zinc-400">최근 동기화</p><p className="text-zinc-900">{formatDate(selectedData.lastDiscordActiveAt)}</p></div>
-                  <div><p className="text-xs text-zinc-400">활동 활용 동의</p><p className="text-zinc-900">{formatDate(selectedData.activityConsentAt)}</p></div>
-                </div>
-                <div className="mt-4 rounded-xl border border-indigo-100 bg-white px-3 py-3">
-                  <p className="text-xs font-semibold text-indigo-700 mb-2">커뮤니티 신뢰 신호</p>
-                  <ul className="space-y-1 text-xs text-zinc-600">
-                    <li>{selectedData.discordUserId ? "✓ Discord 계정 인증 완료" : "• Discord 계정 매칭 전"}</li>
-                    <li>{selectedData.discordRoles?.length ? `✓ 서버 역할 ${selectedData.discordRoles.length}개 동기화` : "• 서버 역할 미동기화"}</li>
-                    <li>{selectedData.discordJoinedAt ? `✓ 서버 합류일 확인: ${formatDate(selectedData.discordJoinedAt)}` : "• 서버 합류일 미확인"}</li>
-                    <li>{selectedData.lastDiscordActiveAt ? `✓ 최근 활동 동기화: ${formatDate(selectedData.lastDiscordActiveAt)}` : "• 최근 활동 동기화 전"}</li>
-                    <li>{selectedData.activityConsentAt ? "✓ 활동 활용 동의 확인" : "• 활동 활용 동의 미확인"}</li>
-                  </ul>
-                  <p className="mt-2 text-xs text-zinc-400">메시지 원문 발췌는 봇이 접근 가능한 채널에서 새 활동을 감지하거나 백필 동기화가 실행된 경우에만 표시됩니다.</p>
-                </div>
-                <div className="mt-4">
-                  <p className="text-xs text-zinc-400 mb-1">역할</p>
-                  <p className="text-sm text-zinc-900">{selectedData.discordRoles?.length ? selectedData.discordRoles.join(", ") : "—"}</p>
-                </div>
-                <div className="mt-4">
-                  <p className="text-xs text-zinc-400 mb-1">활동 요약</p>
-                  <p className="text-sm text-zinc-900 whitespace-pre-wrap">{selectedDiscordActivity.overview}</p>
-                </div>
-                <details className="mt-4 rounded-xl border border-indigo-100 bg-white" open={selectedDiscordActivity.hasDepth}>
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3 text-sm font-semibold text-indigo-800">
-                    <span className="flex items-center gap-2"><Activity className="h-4 w-4" /> 활동 딥다이브</span>
-                    <span className="text-xs font-normal text-zinc-400">{selectedData.activityEvidence?.length ? `메시지 증거 ${selectedData.activityEvidence.length}건` : selectedDiscordActivity.hasDepth ? "요약 동기화 완료 · 원문 증거 대기" : "자동 수집 대기"}</span>
-                  </summary>
-                  <div className="border-t border-indigo-50 px-3 py-3 space-y-3">
-                    {selectedDiscordActivity.hasDepth ? (
-                      <>
-                        <div>
-                          <p className="text-xs font-semibold text-zinc-500 mb-1">활동 요약 · 최근 활동 타임라인 · 수집 범위</p>
-                          <p className="text-sm text-zinc-800 whitespace-pre-wrap">{selectedDiscordActivity.depth}</p>
-                        </div>
-                        <div className="grid gap-2 rounded-lg bg-indigo-50/60 p-3 text-xs text-zinc-600">
-                          <p className="font-semibold text-indigo-800">운영 판단 포인트</p>
-                          <p>· 최근 활동 타임라인에서 실제 커뮤니티 참여의 최신성을 봅니다.</p>
-                          <p>· 메시지 증거가 쌓이면 채널/주제/댓글 맥락에서 관심사와 기여 영역을 봅니다.</p>
-                          <p>· 수집 범위에서 봇 권한 때문에 빠진 채널이 있는지 확인합니다.</p>
-                        </div>
-                      </>
-                    ) : (
-                      <div className="grid gap-2 rounded-lg bg-amber-50 p-3 text-sm text-amber-900">
-                        <p className="font-semibold">아직 활동 상세 수집 전입니다.</p>
-                        <p>이 사람은 Discord 계정 매칭만 완료된 상태입니다.</p>
-                        <p>채널별 활동/최근 활동 타임라인은 아직 수집되지 않았습니다.</p>
-                        <p>이제부터 이 사용자가 봇이 볼 수 있는 Discord 채널에 글을 쓰면 자동으로 메시지 증거가 쌓입니다. 과거 활동은 운영진 백필 동기화가 실행된 경우에만 표시됩니다.</p>
-                      </div>
-                    )}
-                  </div>
-                </details>
-                <details className="mt-4 rounded-xl border border-zinc-200 bg-white" open={Boolean(selectedData.activityEvidence?.length)}>
-                  <summary className="flex cursor-pointer list-none items-center justify-between gap-3 px-3 py-3 text-sm font-semibold text-zinc-900">
-                    <span className="flex items-center gap-2"><Activity className="h-4 w-4" /> Discord 활동 기록 보러가기</span>
-                    <span className="text-xs font-normal text-zinc-400">날짜별 활동 · 메시지 원문 발췌</span>
-                  </summary>
-                  <div className="border-t border-zinc-100 px-3 py-3 space-y-4">
-                    {selectedData.activityEvidence?.length ? (
-                      <>
-                        <p className="text-xs text-zinc-500">봇이 접근 가능한 채널에서 자동 수집한 최근 메시지 발췌입니다. 전체 원문이 아니라 운영 검토에 필요한 최대 1,200자 발췌만 저장합니다.</p>
-                        {Object.entries(selectedDiscordEvidenceByDate).map(([date, items]) => (
-                          <div key={date} className="space-y-2">
-                            <p className="text-xs font-bold text-zinc-500">{date}</p>
-                            {items.map((item) => (
-                              <article key={item.id} className="rounded-lg border border-zinc-100 bg-zinc-50 p-3">
-                                <div className="flex flex-wrap items-center gap-2 text-xs text-zinc-500">
-                                  <span>#{item.channelName}</span>
-                                  <span>·</span>
-                                  <span>{formatMessageType(item.messageType)}</span>
-                                  <span>·</span>
-                                  <span>{formatDate(item.occurredAt)}</span>
-                                  {item.messageUrl ? <a className="ml-auto text-indigo-600 hover:underline" href={item.messageUrl} target="_blank" rel="noreferrer">Discord에서 열기</a> : null}
-                                </div>
-                                <p className="mt-2 text-xs font-semibold text-zinc-500">메시지 원문 발췌</p>
-                                <p className="mt-1 whitespace-pre-wrap text-sm leading-relaxed text-zinc-900">{item.contentExcerpt}</p>
-                              </article>
-                            ))}
-                          </div>
-                        ))}
-                      </>
-                    ) : (
-                      <p className="rounded-lg bg-amber-50 p-3 text-sm text-amber-900">아직 메시지 단위 활동 기록이 없습니다. 앞으로 이 사용자가 봇이 접근 가능한 Discord 채널에 글을 쓰면 자동으로 날짜별 활동과 메시지 원문 발췌가 채워집니다. 과거 메시지는 백필 동기화를 실행한 경우에만 표시됩니다.</p>
-                    )}
-                  </div>
-                </details>
-                <div className="mt-4">
-                  <p className="text-xs text-zinc-400 mb-2">최근 활동 로그</p>
-                  {selectedData.activities?.length ? (
-                    <ul className="space-y-2">
-                      {selectedData.activities.map((activity) => (
-                        <li key={activity.id} className="rounded-lg bg-white border border-indigo-100 px-3 py-2">
-                          <p className="text-xs text-zinc-400">{activity.source} · {formatActivityType(activity.type)} · {formatDate(activity.occurredAt)}</p>
-                          <p className="text-xs font-semibold text-zinc-500 mt-1">{isDeepDiscordActivity(activity.summary) ? "활동 상세 근거" : "처리 내용"}</p>
-                          <p className="text-sm text-zinc-800 mt-1 whitespace-pre-wrap">{activity.summary}</p>
-                        </li>
-                      ))}
-                    </ul>
-                  ) : <p className="text-sm text-zinc-400">아직 동기화된 활동이 없습니다.</p>}
-                </div>
-              </section>
-
-              <div>
-                <p className="text-xs text-zinc-400 mb-1">메모</p>
-                <textarea className="w-full border border-zinc-200 rounded-lg p-3 text-sm min-h-[80px] resize-none focus:outline-none focus:ring-2 focus:ring-zinc-900" placeholder="내부 메모를 입력하세요..." />
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showUpload && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
