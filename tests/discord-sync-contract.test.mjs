@@ -34,28 +34,36 @@ test("Discord sync API routes exist and require bearer secret", () => {
   }
 });
 
-test("quick registration returns and displays a hire link code", () => {
+test("quick registration accepts Discord handle without forcing bot commands", () => {
   const quickRoute = read("src/app/api/members/quick/route.ts");
   const quickPage = read("src/app/register/quick/page.tsx");
   const successPage = read("src/app/register/quick/success/page.tsx");
   assert.match(quickRoute, /hireLinkCode/);
+  assert.match(quickRoute, /discordUsername: discordHandle \|\| null/);
+  assert.match(quickRoute, /activityConsentAt/);
   assert.match(quickPage, /hireLinkCode/);
+  assert.match(quickPage, /Discord 닉네임 또는 사용자명/);
+  assert.match(quickPage, /직접 Discord 명령어를 입력하지 않아도/);
+  assert.match(quickPage, /활동 맥락을 인재풀 매칭 검토에 활용/);
   assert.match(successPage, /연동 코드/);
-  assert.match(successPage, /선택 사항 · 커뮤니티 인증/);
-  assert.match(successPage, /나중에 해도 됩니다/);
-  assert.match(successPage, /매칭 신뢰도/);
+  assert.match(successPage, /선택 사항 · 커뮤니티 매칭 상태/);
+  assert.match(successPage, /직접 인증은 선택/);
+  assert.match(successPage, /서버 멤버 매칭을 시도/);
   assert.match(successPage, /\/hire-link/);
-  assert.match(successPage, /Discord에서 커뮤니티 인증하기/);
+  assert.match(successPage, /선택 인증/);
   assert.match(successPage, /공개 채널에 코드를 올리지 마세요/);
   assert.match(successPage, /\/hire-sync-me/);
 });
 
-test("full profile registration continues into Discord linking flow", () => {
+test("full profile registration captures Discord handle for operator matching", () => {
   const membersRoute = read("src/app/api/members/route.ts");
   const registerPage = read("src/app/register/page.tsx");
   assert.equal(membersRoute.includes("hireLinkCode: member.hireLinkCode"), true);
+  assert.match(membersRoute, /discordUsername: discordHandle \|\| null/);
+  assert.match(membersRoute, /activityConsentAt/);
   assert.match(registerPage, /hireLinkCode/);
-  assert.match(registerPage, /Discord 커뮤니티 인증을 선택/);
+  assert.match(registerPage, /Discord 닉네임 또는 사용자명/);
+  assert.match(registerPage, /직접 봇 명령어를 입력하지 않아도/);
   assert.equal(registerPage.includes("/register/quick/success"), true);
   assert.equal(registerPage.includes('window.location.href = "/"'), false);
 });
@@ -69,5 +77,8 @@ test("admin dashboard exposes Discord community trust information", () => {
   assert.match(admin, /Discord 인증 정보 확인 위치/);
   assert.match(admin, /표의 Discord 컬럼/);
   assert.match(admin, /인증 완료/);
+  assert.match(admin, /입력됨/);
+  assert.match(admin, /매칭 필요/);
+  assert.match(admin, /활동 활용 동의/);
   assert.match(admin, /활동 요약/);
 });

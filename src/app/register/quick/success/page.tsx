@@ -45,18 +45,18 @@ export default async function QuickRegisterSuccessPage({ searchParams }: QuickRe
           <p className="text-zinc-500 text-sm leading-relaxed mb-8">
             너디너리 인재풀에 등록되었습니다.
             <br />
-            Discord 커뮤니티 인증은 선택 사항이며, 이미 활동 중인 분의 맥락을 더 정확히 반영하기 위한 단계입니다.
+            Discord 정보를 남겼다면 운영팀/봇이 서버 멤버와 매칭을 시도합니다. 직접 인증은 선택입니다.
           </p>
 
           {hireLinkCode && (
             <div className="bg-indigo-50 border border-indigo-100 rounded-2xl p-5 mb-6 text-left">
-              <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-2">선택 사항 · 커뮤니티 인증으로 매칭 신뢰도 강화</p>
+              <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide mb-2">선택 사항 · 커뮤니티 매칭 상태</p>
               <p className="text-sm text-zinc-700 mb-3">
-                Discord 연동은 필수가 아닙니다. 다만 이미 너디너리 Discord에서 활동 중이라면, 닉네임·서버 역할·활동 맥락이 함께 확인되어
-                프로필 검토 정확도와 프로젝트/채용 제안 가능성이 올라갑니다.
+                등록폼에 Discord 닉네임/사용자명을 입력했다면, 운영팀과 봇이 해당 정보를 기준으로 서버 멤버 매칭을 시도합니다.
+                사용자가 Discord에서 직접 명령어를 입력하지 않아도 검토가 시작됩니다.
               </p>
               <p className="rounded-xl bg-white/70 border border-indigo-100 px-3 py-2 text-xs text-zinc-500 leading-relaxed mb-4">
-                나중에 해도 됩니다. 지금 인증하면 추가 입력 없이 커뮤니티에서 쌓은 신뢰 정보가 프로필에 연결됩니다.
+                직접 인증은 선택입니다. 정확히 본인 Discord 계정으로 연결하고 싶거나 매칭이 안 될 때만 아래 연결 코드를 사용하세요.
               </p>
               <p className="text-xs text-zinc-400 mb-1">연동 코드</p>
               <div className="rounded-xl bg-white border border-indigo-100 px-4 py-3 font-mono text-lg font-bold tracking-wider text-zinc-900">
@@ -69,10 +69,10 @@ export default async function QuickRegisterSuccessPage({ searchParams }: QuickRe
                   rel="noreferrer"
                   className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white hover:bg-indigo-500 transition-colors"
                 >
-                  1. Discord에서 커뮤니티 인증하기
+                  Discord 입장/직접 인증 열기
                 </a>
                 <div className="rounded-xl bg-white border border-indigo-100 p-4">
-                  <p className="text-xs font-semibold text-zinc-700 mb-2">2. NEORDINARY_ROLE_BOT에게 개인 연결 코드 전달</p>
+                  <p className="text-xs font-semibold text-zinc-700 mb-2">선택 인증: NEORDINARY_ROLE_BOT에게 개인 연결 코드 전달</p>
                   <div className="rounded-lg bg-zinc-900 px-3 py-2 font-mono text-xs text-white break-all">
                     /hire-link code:{hireLinkCode}
                   </div>
@@ -81,7 +81,7 @@ export default async function QuickRegisterSuccessPage({ searchParams }: QuickRe
                   </p>
                 </div>
                 <div className="rounded-xl bg-white border border-indigo-100 p-4">
-                  <p className="text-xs font-semibold text-zinc-700 mb-2">3. 역할·닉네임 최신 정보 동기화</p>
+                  <p className="text-xs font-semibold text-zinc-700 mb-2">선택 인증: 역할·닉네임 최신 정보 동기화</p>
                   <div className="rounded-lg bg-zinc-900 px-3 py-2 font-mono text-xs text-white">
                     /hire-sync-me
                   </div>

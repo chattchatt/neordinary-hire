@@ -17,11 +17,12 @@ export default function RegisterPage() {
     affiliation: "", organization: "", roles: [] as string[],
     techStack: "", certifications: "", experience: "", projectExperience: "",
     communityType: "", generation: "", communityRole: "", track: "",
+    discordHandle: "", activityConsent: false,
     availability: "", workType: "", workRegion: "", employmentTypes: [] as string[],
     portfolioUrl: "", bio: "", notes: "",
   });
 
-  const updateField = (field: string, value: string) => setForm((prev) => ({ ...prev, [field]: value }));
+  const updateField = (field: string, value: string | boolean) => setForm((prev) => ({ ...prev, [field]: value }));
 
   const toggleArrayField = (field: "roles" | "employmentTypes", value: string) => {
     setForm((prev) => {
@@ -94,7 +95,7 @@ export default function RegisterPage() {
           <h1 className="text-3xl sm:text-4xl font-bold text-zinc-900">인재 등록</h1>
           <p className="mt-2 text-zinc-500">프로필을 등록하면 적합한 채용·프로젝트 기회 검토 대상에 포함됩니다.</p>
           <p className="mt-2 text-xs text-zinc-400">
-            등록 완료 후 Discord 커뮤니티 인증을 선택하면 닉네임·서버 역할·활동 맥락까지 연결되어 매칭 신뢰도를 높일 수 있습니다.
+            Discord 닉네임을 함께 남기면 직접 봇 명령어를 입력하지 않아도 운영팀/봇이 커뮤니티 활동 맥락 매칭을 시도합니다.
           </p>
 
           {/* Progress */}
@@ -241,6 +242,27 @@ export default function RegisterPage() {
                     </div>
                   </>
                 )}
+                <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4">
+                  <label className={labelClass}>Discord 닉네임 또는 사용자명</label>
+                  <input
+                    type="text"
+                    className={inputClass}
+                    placeholder="예: codexlive 또는 코덱스라이브"
+                    value={form.discordHandle}
+                    onChange={(e) => updateField("discordHandle", e.target.value)}
+                    maxLength={80}
+                  />
+                  <p className="mt-1 text-xs text-zinc-400">직접 Discord 명령어를 입력하지 않아도 운영팀/봇이 서버 멤버와 매칭을 시도합니다.</p>
+                  <label className="mt-3 flex items-start gap-2 text-xs text-zinc-500 leading-relaxed">
+                    <input
+                      type="checkbox"
+                      className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500"
+                      checked={form.activityConsent}
+                      onChange={(e) => updateField("activityConsent", e.target.checked)}
+                    />
+                    <span>Discord 서버 내 닉네임·역할·활동 맥락을 인재풀 매칭 검토에 활용하는 데 동의합니다.</span>
+                  </label>
+                </div>
               </>
             )}
 

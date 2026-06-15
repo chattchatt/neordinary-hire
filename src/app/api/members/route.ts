@@ -135,6 +135,12 @@ export async function GET(req: NextRequest) {
 // POST /api/members — 멤버 등록
 export async function POST(req: NextRequest) {
   const body = await req.json();
+  const discordHandle = typeof body.discordHandle === "string"
+    ? body.discordHandle.replace(/<[^>]*>/g, "").trim().slice(0, 80)
+    : typeof body.discordUsername === "string"
+      ? body.discordUsername.replace(/<[^>]*>/g, "").trim().slice(0, 80)
+      : "";
+  const activityConsent = body.activityConsent === true;
 
   let member;
   try {
@@ -160,6 +166,8 @@ export async function POST(req: NextRequest) {
         workRegion: body.workRegion,
         employmentTypes: body.employmentTypes || [],
         hireLinkCode: generateHireLinkCode(),
+        discordUsername: discordHandle || null,
+        activityConsentAt: discordHandle && activityConsent ? new Date() : null,
         portfolioUrl: body.portfolioUrl || null,
         bio: body.bio || null,
         notes: body.notes || null,

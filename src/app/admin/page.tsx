@@ -189,6 +189,7 @@ export default function AdminPage() {
   const selectClass = "border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-zinc-900";
   const selectedData = members.find((d) => d.id === selected);
   const visibleDiscordLinked = members.filter((member) => member.discordUserId).length;
+  const visibleDiscordSubmitted = members.filter((member) => !member.discordUserId && member.discordUsername).length;
 
   if (!authed) return <LoginGate onAuth={() => setAuthed(true)} />;
 
@@ -249,7 +250,7 @@ export default function AdminPage() {
               </p>
             </div>
             <span className="text-xs font-semibold text-indigo-700 bg-white border border-indigo-100 rounded-full px-3 py-1">
-              현재 목록 {visibleDiscordLinked}/{members.length}명 인증
+              현재 목록 {visibleDiscordLinked}명 인증 · {visibleDiscordSubmitted}명 입력/매칭 필요
             </span>
           </div>
         </div>
@@ -280,7 +281,7 @@ export default function AdminPage() {
             <button onClick={resetFilters} className="text-sm text-zinc-400 hover:text-zinc-900 transition-colors">초기화</button>
           </div>
           <p className="mt-3 text-sm text-zinc-500">
-            {loading ? "로딩 중..." : `${members.length}명의 인재 · Discord 인증 ${visibleDiscordLinked}명 · 행 클릭 시 상세 커뮤니티 신뢰 정보 확인`}
+            {loading ? "로딩 중..." : `${members.length}명의 인재 · Discord 인증 ${visibleDiscordLinked}명 · 입력/매칭 필요 ${visibleDiscordSubmitted}명 · 행 클릭 시 상세 커뮤니티 신뢰 정보 확인`}
           </p>
         </div>
 
@@ -318,10 +319,17 @@ export default function AdminPage() {
                             {d.activities?.length ? ` · 활동 ${d.activities.length}건` : ""}
                           </p>
                         </div>
+                      ) : d.discordUsername ? (
+                        <div className="space-y-1">
+                          <span className="inline-flex bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md text-xs font-medium">
+                            입력됨 · {d.discordUsername}
+                          </span>
+                          <p className="text-xs text-zinc-400">봇/운영팀 매칭 필요</p>
+                        </div>
                       ) : (
                         <div className="space-y-1">
-                          <span className="text-zinc-300">미인증</span>
-                          {d.hireLinkCode && <p className="text-xs text-zinc-300">등록 완료 페이지에서 선택 인증 가능</p>}
+                          <span className="text-zinc-300">미입력</span>
+                          {d.hireLinkCode && <p className="text-xs text-zinc-300">직접 인증은 선택 사항</p>}
                         </div>
                       )}
                     </td>
@@ -378,19 +386,20 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">커뮤니티 신뢰 정보</p>
-                    <p className="text-sm text-zinc-600 mt-1">NERDY Discord 봇으로 연동된 닉네임과 활동 히스토리입니다.</p>
+                    <p className="text-sm text-zinc-600 mt-1">등록폼 입력값과 NERDY Discord 봇으로 연동된 닉네임·역할·활동 히스토리입니다.</p>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full ${selectedData.discordUserId ? "bg-indigo-600 text-white" : "bg-white text-zinc-400"}`}>
-                    {selectedData.discordUserId ? "연동됨" : "미연동"}
+                  <span className={`text-xs px-2 py-1 rounded-full ${selectedData.discordUserId ? "bg-indigo-600 text-white" : selectedData.discordUsername ? "bg-amber-100 text-amber-700" : "bg-white text-zinc-400"}`}>
+                    {selectedData.discordUserId ? "인증 완료" : selectedData.discordUsername ? "입력됨/매칭 필요" : "미입력"}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  <div><p className="text-xs text-zinc-400">Discord 닉네임</p><p className="text-zinc-900">{selectedData.discordNickname || "—"}</p></div>
+                  <div><p className="text-xs text-zinc-400">Discord 닉네임</p><p className="text-zinc-900">{selectedData.discordNickname || selectedData.discordUsername || "—"}</p></div>
                   <div><p className="text-xs text-zinc-400">표시명</p><p className="text-zinc-900">{selectedData.discordDisplayName || "—"}</p></div>
                   <div><p className="text-xs text-zinc-400">사용자명</p><p className="text-zinc-900">{selectedData.discordUsername || "—"}</p></div>
-                  <div><p className="text-xs text-zinc-400">Discord ID</p><p className="text-zinc-900 break-all">{selectedData.discordUserId || "—"}</p></div>
+                  <div><p className="text-xs text-zinc-400">Discord ID</p><p className="text-zinc-900 break-all">{selectedData.discordUserId || (selectedData.discordUsername ? "매칭 전" : "—")}</p></div>
                   <div><p className="text-xs text-zinc-400">서버 합류</p><p className="text-zinc-900">{formatDate(selectedData.discordJoinedAt)}</p></div>
                   <div><p className="text-xs text-zinc-400">최근 동기화</p><p className="text-zinc-900">{formatDate(selectedData.lastDiscordActiveAt)}</p></div>
+                  <div><p className="text-xs text-zinc-400">활동 활용 동의</p><p className="text-zinc-900">{formatDate(selectedData.activityConsentAt)}</p></div>
                 </div>
                 <div className="mt-4">
                   <p className="text-xs text-zinc-400 mb-1">역할</p>

@@ -56,6 +56,8 @@ export async function POST(req: NextRequest) {
   const phone = sanitize(body.phone);
   const techStack = sanitize(body.techStack);
   const availability = sanitize(body.availability);
+  const discordHandle = sanitize(body.discordHandle || body.discordUsername).slice(0, 80);
+  const activityConsent = body.activityConsent === true;
 
   const rolesRaw = Array.isArray(body.roles) ? body.roles : [];
   const roles = rolesRaw.map((r) => sanitize(String(r))).filter(Boolean);
@@ -115,6 +117,8 @@ export async function POST(req: NextRequest) {
         availability,
         employmentTypes,
         hireLinkCode,
+        discordUsername: discordHandle || null,
+        activityConsentAt: discordHandle && activityConsent ? new Date() : null,
         // Quick register defaults for required schema fields
         affiliation: "미입력",
         workType: "미정",

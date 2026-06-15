@@ -34,12 +34,14 @@ export default function QuickRegisterPage() {
     techStack: "",
     availability: "",
     employmentTypes: [] as string[],
+    discordHandle: "",
+    activityConsent: false,
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
-  const updateField = (field: string, value: string) => {
+  const updateField = (field: string, value: string | boolean) => {
     setForm((prev) => ({ ...prev, [field]: value }));
     setFieldErrors((prev) => ({ ...prev, [field]: "" }));
     setError("");
@@ -295,6 +297,33 @@ export default function QuickRegisterPage() {
               {fieldErrors.employmentTypes && (
                 <p className="text-xs text-red-500 mt-2">{fieldErrors.employmentTypes}</p>
               )}
+            </div>
+
+            {/* Discord handle */}
+            <div className="rounded-2xl border border-indigo-100 bg-indigo-50/50 p-4">
+              <label className={labelClass}>
+                Discord 닉네임 또는 사용자명 <span className="text-zinc-400 font-normal text-xs ml-1">선택</span>
+              </label>
+              <input
+                type="text"
+                className={inputClass}
+                placeholder="예: codexlive 또는 코덱스라이브"
+                value={form.discordHandle}
+                onChange={(e) => updateField("discordHandle", e.target.value)}
+                maxLength={80}
+              />
+              <p className={hintClass}>
+                직접 Discord 명령어를 입력하지 않아도 운영팀/봇이 서버 멤버와 매칭을 시도합니다.
+              </p>
+              <label className="mt-3 flex items-start gap-2 text-xs text-zinc-500 leading-relaxed">
+                <input
+                  type="checkbox"
+                  className="mt-0.5 h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500"
+                  checked={form.activityConsent}
+                  onChange={(e) => updateField("activityConsent", e.target.checked)}
+                />
+                <span>Discord 서버 내 닉네임·역할·활동 맥락을 인재풀 매칭 검토에 활용하는 데 동의합니다.</span>
+              </label>
             </div>
 
             {/* Error messages */}
