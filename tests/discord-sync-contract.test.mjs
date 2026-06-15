@@ -42,6 +42,16 @@ test("Discord sync API routes exist and require bearer secret", () => {
   }
 });
 
+test("Discord sync can auto-link a pending profile by submitted handle", () => {
+  const syncRoute = read("src/app/api/discord/sync/route.ts");
+  assert.match(syncRoute, /findPendingMemberByDiscordHandle/);
+  assert.match(syncRoute, /discordUserId: null/);
+  assert.match(syncRoute, /mode: "insensitive"/);
+  assert.match(syncRoute, /자동 매칭 후보가 여러 명/);
+  assert.match(syncRoute, /discordLinkedAt: member.discordLinkedAt \|\| now/);
+  assert.match(syncRoute, /activityType = "auto-link"/);
+});
+
 test("quick registration accepts Discord handle without forcing bot commands", () => {
   const quickRoute = read("src/app/api/members/quick/route.ts");
   const quickPage = read("src/app/register/quick/page.tsx");
@@ -96,7 +106,7 @@ test("admin dashboard exposes Discord community trust information", () => {
   assert.match(admin, /표의 Discord 컬럼/);
   assert.match(admin, /인증 완료/);
   assert.match(admin, /입력됨/);
-  assert.match(admin, /매칭 필요/);
+  assert.match(admin, /자동 매칭 대기/);
   assert.match(admin, /활동 활용 동의/);
   assert.match(admin, /활동 요약/);
 });

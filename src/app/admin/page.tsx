@@ -250,7 +250,7 @@ export default function AdminPage() {
               </p>
             </div>
             <span className="text-xs font-semibold text-indigo-700 bg-white border border-indigo-100 rounded-full px-3 py-1">
-              현재 목록 {visibleDiscordLinked}명 인증 · {visibleDiscordSubmitted}명 입력/매칭 필요
+              현재 목록 {visibleDiscordLinked}명 인증 · {visibleDiscordSubmitted}명 입력/자동 매칭 대기
             </span>
           </div>
         </div>
@@ -281,7 +281,7 @@ export default function AdminPage() {
             <button onClick={resetFilters} className="text-sm text-zinc-400 hover:text-zinc-900 transition-colors">초기화</button>
           </div>
           <p className="mt-3 text-sm text-zinc-500">
-            {loading ? "로딩 중..." : `${members.length}명의 인재 · Discord 인증 ${visibleDiscordLinked}명 · 입력/매칭 필요 ${visibleDiscordSubmitted}명 · 행 클릭 시 상세 커뮤니티 신뢰 정보 확인`}
+            {loading ? "로딩 중..." : `${members.length}명의 인재 · Discord 인증 ${visibleDiscordLinked}명 · 입력/자동 매칭 대기 ${visibleDiscordSubmitted}명 · 행 클릭 시 상세 커뮤니티 신뢰 정보 확인`}
           </p>
         </div>
 
@@ -324,7 +324,7 @@ export default function AdminPage() {
                           <span className="inline-flex bg-amber-50 text-amber-700 px-2 py-0.5 rounded-md text-xs font-medium">
                             입력됨 · {d.discordUsername}
                           </span>
-                          <p className="text-xs text-zinc-400">봇/운영팀 매칭 필요</p>
+                          <p className="text-xs text-zinc-400">봇 자동 매칭 대기</p>
                         </div>
                       ) : (
                         <div className="space-y-1">
@@ -386,10 +386,10 @@ export default function AdminPage() {
                 <div className="flex items-center justify-between mb-3">
                   <div>
                     <p className="text-xs font-semibold text-indigo-600 uppercase tracking-wide">커뮤니티 신뢰 정보</p>
-                    <p className="text-sm text-zinc-600 mt-1">등록폼 입력값과 NERDY Discord 봇으로 연동된 닉네임·역할·활동 히스토리입니다.</p>
+                    <p className="text-sm text-zinc-600 mt-1">등록폼 입력값과 NERDY Discord 봇으로 자동 매칭된 닉네임·역할·활동 히스토리입니다.</p>
                   </div>
                   <span className={`text-xs px-2 py-1 rounded-full ${selectedData.discordUserId ? "bg-indigo-600 text-white" : selectedData.discordUsername ? "bg-amber-100 text-amber-700" : "bg-white text-zinc-400"}`}>
-                    {selectedData.discordUserId ? "인증 완료" : selectedData.discordUsername ? "입력됨/매칭 필요" : "미입력"}
+                    {selectedData.discordUserId ? "인증 완료" : selectedData.discordUsername ? "입력됨/자동 매칭 대기" : "미입력"}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
