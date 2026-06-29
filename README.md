@@ -1,36 +1,61 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NE(O)RDINARY HIRE
 
-## Getting Started
+NE(O)RDINARY HIRE is a web service for reviewing verified talent signals from the NE(O)RDINARY community and matching anonymized candidates to partner hiring or project needs.
 
-First, run the development server:
+This repository is the **GitHub execution source of truth** for product requirements, implementation work, issue tracking, release checks, and privacy/security operating rules.
+
+> Public repository rule: do not commit raw personal data, private community logs, customer materials, confidential launch documents, secrets, tokens, or non-public partner evidence.
+
+## Product boundary
+
+NE(O)RDINARY HIRE is:
+
+- a focused talent-review web service built from community participation, project evidence, and operator review;
+- a partner-facing way to evaluate anonymized candidate fit before direct contact;
+- an operational experiment/service connected to the NE(O)RDINARY community.
+
+NE(O)RDINARY HIRE is not:
+
+- the whole NE(O)RDINARY business or brand;
+- a claim that one pilot use case proves the full business model;
+- a resume-only marketplace or generic ATS;
+- a place to expose raw Discord, Google Drive, contact, or internal operator data to companies.
+
+## Core surfaces
+
+- `/register` and `/register/quick`: talent registration and community matching intake
+- `/admin`: internal review, evidence curation, and operator workflow
+- `/company`: anonymized company review dashboard
+- API routes under `/api`: registration, auth, and community/evidence sync surfaces
+
+## Product operating docs
+
+- [`PRODUCT.md`](PRODUCT.md): product definition, current phase, product principles, metrics
+- [`REQUIREMENTS.md`](REQUIREMENTS.md): functional, non-functional, and business requirements
+- [`ROADMAP.md`](ROADMAP.md): phased delivery plan and current sprint
+- [`OPERATIONS.md`](OPERATIONS.md): recurring product/admin/company operations
+- [`SECURITY.md`](SECURITY.md): privacy boundaries, secret handling, company-view policy
+- [`docs/ia-and-flows.md`](docs/ia-and-flows.md): information architecture and user flows
+- [`docs/company-view-policy.md`](docs/company-view-policy.md): anonymized partner dashboard policy
+- [`docs/admin-policy.md`](docs/admin-policy.md): internal operator review policy
+- [`docs/scoring-policy.md`](docs/scoring-policy.md): score explanation and guardrails
+- [`docs/data-model.md`](docs/data-model.md): product-level entity map aligned with Prisma
+- [`docs/release-checklist.md`](docs/release-checklist.md): release readiness checks
+
+## Development
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm run lint
+npm run build
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Verification contract
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Before merging product changes:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+1. keep `PRODUCT.md` / `REQUIREMENTS.md` / `ROADMAP.md` aligned with the issue or PR;
+2. run relevant tests, lint, and build checks;
+3. verify the company view does not expose forbidden personal or raw evidence fields;
+4. document any unverified risk in the PR.
