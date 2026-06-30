@@ -8,6 +8,11 @@ NE(O)RDINARY HIRE is a web service that helps partner companies and institutions
 
 Can community activity, project evidence, and operator review produce a more trustworthy early shortlist than resumes alone, while protecting talent privacy until there is a qualified partner need?
 
+
+## Planning source of truth
+
+Use [`docs/product-planning-sot.md`](docs/product-planning-sot.md) as the current planning SOT before widening implementation scope. It tracks the problem definition, hypotheses, research plan, competitor framing, and product decisions that must be synchronized before deeper development.
+
 ## Current product phase
 
 **Phase:** Partner Review MVP stabilization

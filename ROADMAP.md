@@ -8,6 +8,7 @@
 - Add issue/PR templates.
 - Add labels and first sprint issues.
 - Keep confidential strategy in private workspaces; keep GitHub focused on execution.
+- Maintain `docs/product-planning-sot.md` and `DESIGN.md` as planning/design gates before expanding implementation scope.
 
 ### Phase 1 — Company Review MVP
 

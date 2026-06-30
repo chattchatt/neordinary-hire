@@ -31,10 +31,12 @@ NE(O)RDINARY HIRE is not:
 ## Product operating docs
 
 - [`PRODUCT.md`](PRODUCT.md): product definition, current phase, product principles, metrics
+- [`DESIGN.md`](DESIGN.md): product/design source of truth for UX, surfaces, and privacy-first interaction rules
 - [`REQUIREMENTS.md`](REQUIREMENTS.md): functional, non-functional, and business requirements
 - [`ROADMAP.md`](ROADMAP.md): phased delivery plan and current sprint
 - [`OPERATIONS.md`](OPERATIONS.md): recurring product/admin/company operations
 - [`SECURITY.md`](SECURITY.md): privacy boundaries, secret handling, company-view policy
+- [`docs/product-planning-sot.md`](docs/product-planning-sot.md): planning SOT for problem definition, hypotheses, research plan, and product decisions
 - [`docs/ia-and-flows.md`](docs/ia-and-flows.md): information architecture and user flows
 - [`docs/company-view-policy.md`](docs/company-view-policy.md): anonymized partner dashboard policy
 - [`docs/admin-policy.md`](docs/admin-policy.md): internal operator review policy
