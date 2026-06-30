@@ -54,6 +54,30 @@ Community-based talent has meaningful evidence that resumes do not capture, but 
 - Early talent may have strong potential but weak traditional credentials.
 - Operators need a repeatable way to curate and broker demand without manually rebuilding every candidate narrative.
 
+### 1주차 기준 정리본 — 문제 정의 / 해결 방안
+
+| 과제 항목 | NE(O)RDINARY HIRE 작성안 |
+| --- | --- |
+| 서비스 명 | NE(O)RDINARY HIRE |
+| 핵심 문제 | 커뮤니티 기반 인재의 실제 역량 evidence는 존재하지만, 파트너가 이를 빠르고 안전하게 검토할 수 있는 표준화된 방식이 없다. |
+| 문제 원인 | evidence가 프로젝트·포트폴리오·운영자 기억·분산 문서에 흩어져 있고, 원본에는 개인정보와 맥락 노이즈가 섞여 있어 파트너에게 그대로 제공하기 어렵다. |
+| 문제 해결 방안 | 운영자가 검수한 프로젝트/활동 evidence를 익명 후보 카드와 비교 가능한 루브릭으로 변환하고, 파트너가 shortlist/inquiry를 남기면 후보 동의와 운영자 중개 후 다음 단계로 연결한다. |
+| 기대 효과 | 파트너는 검토 시간을 줄이고, 후보는 조기 신원 노출 없이 기회를 얻으며, 운영자는 사람 의존적인 추천을 반복 가능한 프로덕트 흐름으로 바꿀 수 있다. |
+
+**1주차 보정 포인트**
+
+- 문제를 “채용 플랫폼이 부족하다”가 아니라 **커뮤니티 evidence가 파트너 검토 단위로 번역되지 않는다**로 좁힌다.
+- 해결책을 “후보 DB 공개”가 아니라 **익명·검수·중개 기반의 evidence review workflow**로 정의한다.
+- 근거 데이터는 공개 저장소에 원문을 붙이지 않는다. 대신 아래 public-safe source category만 SOT에 남긴다.
+
+| 근거 유형 | 현재 사용 방식 | repo-local 출처 |
+| --- | --- | --- |
+| 데이터 소스 범위 | 후보 registry/evidence/rubric만 HIRE 직접 데이터로 인정하고, 일반 운영/예산/후원 자료는 제외한다. | [`docs/data-source-inventory.md`](data-source-inventory.md) |
+| 파트너 노출 정책 | 익명-first, 연락처/신원/원문 로그 비노출, 운영자 중개 원칙을 기준으로 삼는다. | [`docs/company-view-policy.md`](company-view-policy.md) |
+| 점수/근거 설명 | 점수는 자동 판단이 아니라 plain-language evidence summary와 검수 상태로 설명한다. | [`docs/scoring-policy.md`](scoring-policy.md) |
+| 제품 범위 | register/admin/company dashboard를 MVP 검증 surface로 유지한다. | [`PRODUCT.md`](../PRODUCT.md), [`REQUIREMENTS.md`](../REQUIREMENTS.md) |
+
+
 ## 5. Users and jobs-to-be-done
 
 | User | Functional job | Emotional job | Social/business job | Success signal |
@@ -113,6 +137,31 @@ A partner can open a protected web dashboard, compare anonymized candidate profi
 ### Differentiation thesis
 
 NE(O)RDINARY HIRE should win narrowly by combining: community-origin evidence + operator curation + anonymous-first partner review + controlled next-step brokerage.
+
+### 2주차 기준 경쟁사 분석 보정
+
+**직접/간접/잠재 경쟁 구분**
+
+| 경쟁 유형 | 대표 예시 | HIRE 관점에서의 의미 |
+| --- | --- | --- |
+| 직접 경쟁 | 개발자/주니어 채용 플랫폼 | 후보 탐색·지원·검토 시간을 줄이려는 같은 수요를 다룬다. |
+| 간접 경쟁 | 지인 추천, 커뮤니티 운영자 수동 추천, 파트너 네트워크 소개 | 같은 “믿을 수 있는 사람 찾기” 문제를 더 수동적이고 관계 중심 방식으로 해결한다. |
+| 잠재 경쟁 | HR SaaS, ATS, 비즈니스 네트워크, 교육기관 취업 연계 시스템 | 파트너/기관이 자체 후보 DB와 검토 도구를 강화하면 HIRE의 일부 역할을 대체할 수 있다. |
+
+**벤치마킹할 요소**
+
+- 후보 리스트/상세를 빠르게 훑는 카드형 정보 구조.
+- role, stack, availability, preference처럼 비교 가능한 필드 체계.
+- 파트너가 관심 후보를 저장하고 다음 액션을 요청하는 CTA.
+- 신뢰를 주는 검수 상태, 추천 근거, 활동 evidence 요약.
+
+**시장에 남아 있는 한계/기회**
+
+- 일반 채용 플랫폼은 후보 신원과 이력서가 먼저 노출되는 경우가 많아, 커뮤니티 기반 성장 신호와 협업 evidence를 충분히 설명하지 못한다.
+- 지인 추천은 신뢰도는 높지만 반복 가능한 비교·검색·상태 관리가 약하다.
+- ATS/HR SaaS는 내부 채용 파이프라인 관리에는 강하지만, 커뮤니티-origin 후보 evidence를 partner-safe card로 변환하는 흐름은 약하다.
+- 따라서 HIRE는 “검색량”이 아니라 **익명 보호 + evidence 해석 + 운영자 중개**의 조합을 차별화해야 한다.
+
 
 ## 9. Market framing for planning
 
@@ -174,9 +223,56 @@ Core questions:
 4. 어떤 조건이 충족되면 이름/연락처 공개에 동의할 수 있나요?
 5. 기존 채용 플랫폼에서 본인의 실제 역량이 드러나지 않았던 경험이 있나요?
 
+### 2주차 기준 유저 리서치 실행안
+
+| 항목 | 파트너 설문/인터뷰 | 후보 설문/인터뷰 |
+| --- | --- | --- |
+| 목적 | 익명 후보 카드만으로 shortlist 판단이 가능한지, 어떤 evidence가 부족한지 확인한다. | 어떤 정보는 익명 공개 가능하고 어떤 정보는 동의 후 공개되어야 하는지 확인한다. |
+| 대상 | 스타트업 대표/팀 리드/채용 담당자/프로젝트 오너 5–8명. | NE(O)RDINARY/UMC 기반 개발자·디자이너·기획자·메이커 후보 10–20명 설문, 5–6명 인터뷰. |
+| 진행 방식 | 5–10개 샘플 카드 walkthrough 후 shortlist/needs-more/not-relevant 선택. | evidence 공개 범위, 동의 threshold, 기존 채용 플랫폼 경험 질문. |
+| 핵심 산출물 | 카드 필드 우선순위, trust blocker, inquiry CTA 요구사항. | 공개 가능 정보 목록, 비공개/동의 필요 정보 목록, 후보 가치 표현 언어. |
+| 제품 반영 | `/company` 카드/상세 정보 구조, shortlist/inquiry copy. | `/register` 동의 문구, evidence prompt, identity reveal policy. |
+
+**설문 핵심 문항 초안**
+
+- 파트너: “후보 검토 시 가장 먼저 보는 근거는 무엇인가요?”
+- 파트너: “이름/연락처 없이도 1차 관심 여부를 판단할 수 있는 정보는 무엇인가요?”
+- 파트너: “다음 단계 문의를 누르기 전에 반드시 필요한 정보는 무엇인가요?”
+- 후보: “파트너에게 익명으로 먼저 보여도 괜찮은 활동 정보는 무엇인가요?”
+- 후보: “어떤 조건이 충족되면 신원/연락처 공개에 동의할 수 있나요?”
+
+**1–2주차에서 3–4주차로 이어지는 보정 결론**
+
+- 메인 사용자는 후보가 아니라 **파트너 리뷰어**로 둔다. MVP의 핵심 검증은 “파트너가 익명 evidence card로 관심 후보를 고를 수 있는가”이기 때문이다.
+- 후보 경험은 서브가 아니라 **신뢰의 전제 조건**이다. 후보 동의와 공개 범위가 불명확하면 파트너 기능도 확장할 수 없다.
+- 시장 분석은 당분간 거대한 HR market 수치보다 **운영 가능한 pilot SOM**으로 관리한다. 실제 가격·전환은 partner walkthrough 이후에 산정한다.
+- 경쟁사 분석은 “채용 플랫폼 비교”에만 머물지 않고, 지인 추천/커뮤니티 수동 추천/기관 취업 연계까지 포함한다.
+
+
 ## 11. 3주차 워크북 기반 기획 산출물
 
 > 이 섹션은 3주차 워크북 원문을 보관하지 않고, NE(O)RDINARY HIRE 기획 의사결정에 필요한 산출물 구조만 제품 SOT로 변환한 것이다. 아래 내용은 실제 설문/인터뷰/운영 데이터로 검증되기 전까지 **초기 가설**이다.
+
+### 11.0 3주차 과제 제출용 요약
+
+| 과제 항목 | 작성안 |
+| --- | --- |
+| 서비스 명 | NE(O)RDINARY HIRE |
+| 서비스가 해결하는 문제 | 커뮤니티에서 관찰된 프로젝트·협업·성장 evidence가 기존 이력서/채용 플랫폼에서는 충분히 설명되지 않고, 파트너에게 원문 그대로 제공하기에는 개인정보·맥락 노이즈·검토 비용 문제가 있다. |
+| 메인 페르소나 | 파트너 리뷰어: 검증된 주니어/메이커 후보를 빠르게 비교하고 싶은 스타트업 대표, 팀 리드, 프로젝트 오너. |
+| 서브 페르소나 | 커뮤니티 기반 후보: 프로젝트 경험은 있지만 기존 이력서로 실제 기여도와 협업 맥락을 설명하기 어려운 주니어/메이커. |
+| 핵심 기능 1 | 익명 후보 카드: role/stack/output/evidence/fit signal을 표준화해 파트너의 1차 검토 시간을 줄인다. |
+| 핵심 기능 2 | shortlist + qualified inquiry: 파트너가 관심 후보를 저장하고 운영자 중개 요청을 남길 수 있게 한다. |
+| 핵심 기능 3 | 동의 기반 신원 공개: 후보 동의와 운영자 확인 전까지 이름/연락처/원문 로그를 노출하지 않는다. |
+| 차별화 전략 1 | 일반 채용 플랫폼처럼 이력서와 공개 프로필을 먼저 보여주는 것이 아니라, 커뮤니티 evidence를 partner-safe 판단 단위로 번역한다. |
+| 차별화 전략 2 | 지인 추천의 신뢰를 유지하되, 카드·루브릭·상태 관리로 반복 가능한 검토 workflow를 만든다. |
+
+**3주차 기준으로 1–2주차에서 다듬어야 할 내용**
+
+- 문제 정의: “좋은 후보를 찾기 어렵다”보다 “좋은 후보의 실제 evidence가 검토 가능한 형태로 번역되지 않는다”가 더 정확하다.
+- 시장/경쟁: 일반 채용 플랫폼뿐 아니라 지인 추천·커뮤니티 수동 추천을 경쟁 대체재로 포함해야 한다.
+- 리서치: 설문 자체보다, 파트너가 익명 카드로 실제 shortlist 판단을 할 수 있는지 보는 walkthrough가 우선이다.
+
 
 ### 11.1 어피니티 다이어그램 설계
 
@@ -309,6 +405,25 @@ Core questions:
 ## 12. 4주차 워크북 기반 IA·Flow·Wireframe 산출물
 
 > 이 섹션은 4주차 워크북 원문을 보관하지 않고, NE(O)RDINARY HIRE 웹서비스 구현 전 필요한 UX 구조 산출물로 변환한 것이다. HIRE는 앱이 아니라 웹서비스이므로, 초기 검증과 파트너 공유에 유리한 **반응형 웹**을 기준으로 한다.
+
+### 12.0 4주차 과제 제출용 요약
+
+| 과제 항목 | 작성안 |
+| --- | --- |
+| 기술 스택 | Web 중심. 현재 저장소와 MVP 검증 속도를 고려해 Next.js/React 기반 반응형 웹을 기준으로 한다. |
+| IA 제출 기준 | Public/Entry, Candidate Submission, Admin, Partner, Trust/Policy의 5개 영역으로 정보 구조를 나눈다. |
+| Flow 제출 기준 | 후보 등록, 운영자 검수, 파트너 검토/문의의 3개 플로우를 최소 산출물로 삼는다. |
+| Wireframe 제출 기준 | Landing, Candidate Register, Admin Candidate Detail, Company Dashboard, Company Candidate Detail을 우선 제작한다. |
+| 4주차에서 역으로 보정되는 내용 | 1–2주차 기획은 앱/마켓플레이스가 아니라 partner dashboard-first 웹서비스로 좁힌다. |
+
+**4주차 기준 핵심 화면 우선순위**
+
+1. `/company`: 파트너가 익명 후보 카드를 비교하고 shortlist/inquiry를 남기는 핵심 검증 화면.
+2. `/company/[candidate]`: evidence와 fit signal이 충분한지 검증하는 상세 화면.
+3. `/admin/members/[id]`: 운영자가 원본 정보를 partner-safe 카드로 변환하는 내부 화면.
+4. `/register` 또는 `/register/quick`: 후보가 evidence와 동의 범위를 제출하는 입력 화면.
+5. `/`: 파트너/후보에게 HIRE가 일반 채용 플랫폼이 아니라 익명 evidence review 서비스임을 설명하는 진입 화면.
+
 
 ### 12.1 기술 스택 방향
 
