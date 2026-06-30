@@ -17,7 +17,7 @@ Related execution docs:
 - [`DESIGN.md`](../DESIGN.md) — product/design source of truth
 - [`docs/company-view-policy.md`](company-view-policy.md) — partner-facing privacy policy
 - [`docs/scoring-policy.md`](scoring-policy.md) — score explanation guardrails
-- [`docs/data-source-inventory.md`](data-source-inventory.md) — source inventory and candidate-card data readiness
+- [`docs/data-source-inventory.md`](data-source-inventory.md) — Data Source SOT와 후보 카드 데이터 준비도
 
 ## 2. Product principle
 

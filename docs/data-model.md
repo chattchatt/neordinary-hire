@@ -30,4 +30,4 @@ Company-to-member shortlist relationship. This supports partner review workflow 
 
 ## Source inventory
 
-Use [`docs/data-source-inventory.md`](data-source-inventory.md) to decide which raw data sources can feed these entities, which candidate-card signals they support, and what partner-safe projection is allowed.
+[`docs/data-source-inventory.md`](data-source-inventory.md)를 기준으로 어떤 원천 데이터가 이 entity에 연결될 수 있는지, 어떤 후보 카드 신호를 지원하는지, 어떤 partner-safe projection이 허용되는지 판단한다.

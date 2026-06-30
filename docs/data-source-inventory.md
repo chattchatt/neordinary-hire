@@ -1,196 +1,195 @@
 # Data Source Inventory — NE(O)RDINARY HIRE
 
-**Status:** Draft
-**Last refreshed:** 2026-07-01
-**Purpose:** define which raw sources can feed NE(O)RDINARY HIRE, what product signals they can produce, and how each source should be exposed or protected.
+**상태:** Draft
+**마지막 갱신:** 2026-07-01
+**목적:** NE(O)RDINARY HIRE에 투입될 수 있는 원천 데이터를 정의하고, 각 데이터가 어떤 제품 신호로 전환될 수 있는지, 어떤 방식으로 노출하거나 보호해야 하는지 정리한다.
 
-This document is a product-planning SOT. It does not grant permission to ingest, expose, or publish raw data. Implementation must still follow `SECURITY.md`, `docs/company-view-policy.md`, and user consent requirements.
+이 문서는 제품 기획 SOT(Source of Truth)이다. 원천 데이터의 수집, 연동, 공개 권한을 부여하는 문서가 아니다. 실제 구현과 운영은 반드시 `SECURITY.md`, `docs/company-view-policy.md`, 사용자 동의 요건을 따라야 한다.
 
-## 1. Data-source principle
+## 1. 데이터 소스 원칙
 
-NE(O)RDINARY HIRE should not collect data because it is available. It should collect or connect data only when it can be transformed into one of four candidate-card signals:
+NE(O)RDINARY HIRE는 “데이터가 존재한다”는 이유만으로 데이터를 수집하지 않는다. 데이터는 아래 4가지 후보 카드 신호 중 하나로 전환될 수 있을 때만 수집하거나 연결한다.
 
-1. **Activity** — did the person participate consistently?
-2. **Evidence** — what did the person actually make or submit?
-3. **Collaboration** — how did the person work with others?
-4. **Growth** — did the person improve, respond to feedback, or expand responsibility?
+1. **Activity** — 이 사람이 꾸준히 참여했는가?
+2. **Evidence** — 이 사람이 실제로 무엇을 만들거나 제출했는가?
+3. **Collaboration** — 이 사람이 다른 사람과 어떻게 일했는가?
+4. **Growth** — 이 사람이 피드백을 반영하거나 책임 범위를 확장하며 성장했는가?
 
-Every source must have an owner, consent basis, privacy level, and candidate-card use case before it is treated as product data.
+모든 데이터 소스는 제품 데이터로 취급되기 전에 반드시 소유자, 동의 근거, 개인정보 등급, 후보 카드 활용 목적이 정의되어야 한다.
 
-## 2. Source classification
+## 2. 소스 분류
 
-| Source class | Examples | Primary value | Default exposure |
+| 소스 유형 | 예시 | 주요 가치 | 기본 노출 원칙 |
 | --- | --- | --- | --- |
-| System-of-record data | UMC Management Solution Board, registration DB, admin review state | Participation, role, cohort, completion, status | Internal/admin; summarized only for partners |
-| Submitted artifact data | Notion assignments, Figma links, GitHub repos, deployed URLs, portfolio links, blog links | Actual work evidence | Public link or curated summary depending on consent and identifiability |
-| Community activity data | Discord activity, peer review, comments, study participation | Collaboration, reliability, community signal | Internal/admin; partner-safe summary only |
-| Operator judgment data | Admin notes, review status, evidence confidence, recommended role | Curation, risk control, matching interpretation | Internal/admin; partner-safe labels only |
-| Partner interaction data | Company shortlist, inquiry, missing-info request, partner feedback | Demand signal, card quality, market fit | Internal/product analytics; aggregate only externally |
-| Research data | Partner interviews, talent surveys, usability walkthrough notes | Problem validation, field priority, pricing/positioning insight | Private research workspace; anonymized synthesis only in GitHub |
+| System-of-record data | UMC Management Solution Board, 등록 DB, 운영진 검토 상태 | 참여, 역할, 기수, 수료, 상태 | 내부/관리자용. 파트너에게는 요약만 노출 |
+| Submitted artifact data | Notion 과제, Figma 링크, GitHub repo, 배포 URL, 포트폴리오, 블로그 링크 | 실제 작업 증거 | 동의와 식별 가능성에 따라 공개 링크 또는 큐레이션 요약 |
+| Community activity data | Discord 활동, 피어 리뷰, 댓글, 스터디 참여 | 협업성, 신뢰성, 커뮤니티 신호 | 내부/관리자용. 파트너에게는 안전한 요약만 노출 |
+| Operator judgment data | 운영진 메모, 검토 상태, evidence confidence, 추천 역할 | 큐레이션, 리스크 통제, 매칭 해석 | 내부/관리자용. 파트너에게는 안전한 label만 노출 |
+| Partner interaction data | 기업 shortlist, 문의, 추가 정보 요청, 파트너 피드백 | 수요 신호, 카드 품질, 시장 적합도 | 내부 제품 분석용. 외부에는 aggregate만 노출 |
+| Research data | 파트너 인터뷰, 인재 설문, 사용성 테스트 메모 | 문제 검증, 필드 우선순위, 가격/포지셔닝 인사이트 | 비공개 리서치 공간. GitHub에는 익명화된 synthesis만 반영 |
 
-## 3. UMC Management Solution Board source map
+## 3. UMC Management Solution Board 소스 맵
 
-UMC Management Solution Board can become the first high-value structured source because it can connect participation, assignments, roles, and completion state.
+UMC Management Solution Board는 참여, 과제, 역할, 수료 상태를 연결할 수 있기 때문에 초기 고가치 구조화 데이터 소스가 될 수 있다.
 
-| Board data | Product signal | Candidate-card use | Privacy level | Notes |
+| Board 데이터 | 제품 신호 | 후보 카드 활용 | 개인정보 등급 | 메모 |
 | --- | --- | --- | --- | --- |
-| Cohort / season / generation | Context | “Participated in X cohort” when non-identifying | Partner-safe if generalized | Avoid exact combinations that identify a person in small cohorts. |
-| Part / track / role | Role fit | Recommended role and filters | Partner-safe | Normalize to product roles: FE, BE, Design, Plan/PM, Maker/Ops. |
-| Team / project assignment | Collaboration context | Team project participation | Restricted summary | Team name may identify; summarize unless consented. |
-| Attendance / participation count | Activity | Reliability indicator | Partner-safe as range/label | Prefer labels like “high participation” over raw attendance logs. |
-| Assignment submission status | Activity / reliability | Completion consistency | Partner-safe as rate/label | Avoid exposing missing-work details unless relevant and consented. |
-| Assignment links | Evidence | Work samples and artifact summaries | Depends on link | Public links require consent and identifiability review. |
-| Submission timestamp / deadline status | Reliability | Timeliness signal | Internal; summarized label only | Use “consistent deadline adherence” rather than raw timestamps. |
-| Peer review participation | Collaboration | Collaboration/feedback signal | Partner-safe summary | Raw peer comments stay private unless explicitly approved. |
-| Received feedback / review score | Growth / quality | Improvement and quality signal | Internal; summarized label only | Avoid ranking people by private peer comments. |
-| Final project / demo / deployment link | Evidence | Strongest work proof | Public or curated summary | Check whether link reveals personal/contact/team private info. |
-| Completion / certificate status | Baseline qualification | Program completion signal | Partner-safe | Should not become sole quality proxy. |
-| Leadership/organizer role | Collaboration / responsibility | Responsibility signal | Partner-safe if non-identifying | Confirm titles and scope before exposing. |
+| 기수 / 시즌 / generation | Context | 식별 위험이 낮을 때 “X기 참여”로 표현 | 일반화 시 partner-safe | 소규모 cohort에서는 정확 조합이 개인을 식별할 수 있으므로 주의 |
+| 파트 / 트랙 / 역할 | Role fit | 추천 역할과 필터 | Partner-safe | FE, BE, Design, Plan/PM, Maker/Ops 등 제품 역할로 normalize |
+| 팀 / 프로젝트 배정 | Collaboration context | 팀 프로젝트 참여 여부 | Restricted summary | 팀명이 개인을 식별할 수 있으므로 동의 전에는 요약 처리 |
+| 출석 / 참여 횟수 | Activity | 신뢰성 지표 | 범위/label로 partner-safe | raw 출석 로그보다 “high participation” 같은 label 선호 |
+| 과제 제출 상태 | Activity / reliability | 완료 일관성 | rate/label로 partner-safe | 미제출 상세 내역은 관련성과 동의가 없으면 노출하지 않음 |
+| 과제 링크 | Evidence | 작업 샘플과 산출물 요약 | 링크별 상이 | 공개 링크도 동의와 식별 가능성 검토 필요 |
+| 제출 시각 / 마감 준수 | Reliability | timeliness 신호 | 내부용. 요약 label만 노출 | raw timestamp 대신 “consistent deadline adherence”로 표현 |
+| 피어 리뷰 참여 | Collaboration | 협업/피드백 신호 | 요약 시 partner-safe | raw peer comment는 명시 승인 전까지 비공개 |
+| 받은 피드백 / 리뷰 점수 | Growth / quality | 개선 및 품질 신호 | 내부용. 요약 label만 노출 | private comment로 개인을 ranking하지 않음 |
+| 최종 프로젝트 / 데모 / 배포 링크 | Evidence | 가장 강한 작업 증거 | 공개 또는 큐레이션 요약 | 링크에 개인 연락처/팀 내부 정보가 드러나는지 확인 필요 |
+| 수료 / certificate 상태 | Baseline qualification | 프로그램 완료 신호 | Partner-safe | 단독 품질 proxy가 되어서는 안 됨 |
+| 리더십 / 운영진 역할 | Collaboration / responsibility | 책임감 신호 | 비식별화 시 partner-safe | 노출 전 title과 실제 scope 확인 필요 |
 
+### 확인된 UMC Board 범위
 
-### Observed UMC Board coverage
+공유된 7th, 8th, 9th, 10th UMC Management Solution Board 스프레드시트는 헤더/스키마 수준으로만 확인했다. 각 Board는 구조적으로 유사하지만, 후반 기수로 갈수록 지부별 탭과 점수/이벤트 관리 탭이 추가된다. 이는 스키마 근거일 뿐이며, row-level 개인정보를 수집하거나 노출해도 된다는 의미가 아니다.
 
-Header-level inspection was performed on the shared 7th, 8th, 9th, and 10th UMC Management Solution Board spreadsheets. The boards are structurally similar, but later boards add branch-level tabs and score/event-management tabs. Treat this as schema evidence only, not as permission to ingest row-level personal data.
-
-| Board | Observed tabs | Candidate-card value | Product caution |
+| Board | 확인된 탭 | 후보 카드 관점의 가치 | 제품상 주의점 |
 | --- | --- | --- | --- |
-| 7th UMC Management Solution Board | `지부/학교`, `전체 챌린저`, `상/벌점 제출`, `회장단 회의 참석 여부` | Baseline member registry, school/branch counts, score/penalty events, leadership attendance | Contains direct identifiers and event reasons; partner exposure must use summaries only. |
-| 8th UMC Management Solution Board | `지부/학교`, `전체 챌린저`, `회장단 회의 참석 여부`, branch tabs | Adds branch-level challenger score/selection/penalty summaries | Branch tabs repeat personal identifiers; use only normalized candidate IDs internally. |
-| 9th UMC Management Solution Board | `지부/학교`, `전체 챌린저`, `회장단 회의 참석 여부`, branch tabs | Adds senior/branch fields and stronger role/part segmentation | Duplicate branch columns and corrected Discord email fields need normalization. |
-| 10th UMC Management Solution Board | `지부/학교`, `전체 챌린저`, `회장단 회의 참석 여부`, branch tabs, `상벌점`, `점수 정리`, `MT 신청 매칭` | Adds score taxonomy, total score rollup, event matching/status data | Event/MT/payment/contact fields are operational, not hiring evidence by default. |
+| 7th UMC Management Solution Board | `지부/학교`, `전체 챌린저`, `상/벌점 제출`, `회장단 회의 참석 여부` | 기본 멤버 registry, 학교/지부별 규모, 점수/벌점 이벤트, 리더십 참석 | 직접 식별자와 이벤트 사유가 포함될 수 있으므로 파트너 노출은 요약만 가능 |
+| 8th UMC Management Solution Board | `지부/학교`, `전체 챌린저`, `회장단 회의 참석 여부`, 지부별 탭 | 지부별 챌린저 점수/선정/벌점 요약 강화 | 지부 탭에도 개인 식별자가 반복되므로 내부 normalized candidate ID만 사용 |
+| 9th UMC Management Solution Board | `지부/학교`, `전체 챌린저`, `회장단 회의 참석 여부`, 지부별 탭 | senior/branch 필드와 role/part segmentation 강화 | 중복 지부 컬럼과 수정된 Discord email 필드 normalize 필요 |
+| 10th UMC Management Solution Board | `지부/학교`, `전체 챌린저`, `회장단 회의 참석 여부`, 지부별 탭, `상벌점`, `점수 정리`, `MT 신청 매칭` | 점수 taxonomy, total score rollup, event matching/status 데이터 추가 | MT/payment/contact 필드는 기본적으로 채용 evidence가 아니라 운영 데이터 |
 
-### Observed field groups
+### 확인된 필드 그룹
 
-| Field group | Observed headers | Useful signal | Partner-safe projection | Default handling |
+| 필드 그룹 | 확인된 헤더 유형 | 유용한 신호 | Partner-safe projection | 기본 처리 |
 | --- | --- | --- | --- | --- |
-| Candidate identity | challenger ID/number, school, nickname, name, birth date, phone, gender, student number, major | Internal identity resolution and deduplication | Anonymous candidate ID, broad school/region only if safe | Restricted; never expose direct identifiers by default. |
-| Contact/account linkage | Notion email, Discord email/raw/corrected email, Discord role-invite link | Account matching and source linkage | None, unless candidate explicitly provides a public contact route | Restricted; use only for internal matching. |
-| Role/track context | part, project part, branch, senior status, operator status, school/central staff title | Role fit, responsibility, cohort context | Normalized role/track and responsibility label | Partner-safe after normalization. |
-| School/branch aggregate | branch, school name, part counts, project-member total, total challengers, operators, dues/payment flags, LT attendance flags | Supply sizing and cohort context | Aggregated talent-pool availability by role/branch | Aggregate only; do not expose school operator contacts. |
-| Score/activity summary | score, total score, best workbook selection week/count, bonus/penalty score, three-strike/dropout flag | Activity, reliability, growth/quality proxy | Qualitative labels such as `high activity`, `needs review`, `not eligible` | Internal first; partner labels require rubric and appeal path. |
-| Score/event reason | bonus/penalty/dropout reason, confirmation status, timestamp, submitter email | Audit trail for operator decisions | None by default | Restricted; reasons may contain sensitive context. |
-| Event/MT operations | matching status/reason, payment confirmation/amount/refund, early-leave/additional notes | Operations only | None by default | Exclude from hiring-product scoring unless a separate consented use case exists. |
+| Candidate identity | challenger ID/number, school, nickname, name, birth date, phone, gender, student number, major | 내부 identity resolution과 deduplication | 익명 candidate ID, 안전한 경우 broad school/region | Restricted. 직접 식별자는 기본 노출 금지 |
+| Contact/account linkage | Notion email, Discord email/raw/corrected email, Discord role-invite link | 계정 매칭과 source linkage | 후보자가 명시적으로 공개 연락 경로를 제공한 경우 외에는 없음 | Restricted. 내부 매칭에만 사용 |
+| Role/track context | part, project part, branch, senior status, operator status, school/central staff title | 역할 적합도, 책임감, cohort context | normalize된 role/track과 responsibility label | normalize 후 partner-safe |
+| School/branch aggregate | branch, school name, part counts, project-member total, total challengers, operators, dues/payment flags, LT attendance flags | 공급 규모와 cohort context | role/branch별 talent-pool availability aggregate | aggregate만 사용. 학교 운영진 연락처 노출 금지 |
+| Score/activity summary | score, total score, best workbook selection week/count, bonus/penalty score, three-strike/dropout flag | activity, reliability, growth/quality proxy | `high activity`, `needs review`, `not eligible` 같은 qualitative label | 내부 우선. partner label은 rubric과 이의제기 경로 필요 |
+| Score/event reason | bonus/penalty/dropout reason, confirmation status, timestamp, submitter email | 운영 결정의 audit trail | 기본적으로 없음 | Restricted. 사유에는 민감 맥락이 포함될 수 있음 |
+| Event/MT operations | matching status/reason, payment confirmation/amount/refund, early-leave/additional notes | 운영 관리 | 기본적으로 없음 | 별도 동의된 use case가 없으면 hiring-product scoring에서 제외 |
 
-### Data products we can derive from the boards
+### Board에서 산출할 수 있는 데이터 제품
 
-1. **Talent pool sizing** — number of candidates by generation, branch, school, and normalized part.
-2. **Candidate registry base** — stable internal candidate identity keyed by challenger ID/number plus generation.
-3. **Role-fit seed** — normalized role from part/project part, senior status, and operator titles.
-4. **Activity/reliability label** — derived from score, best-workbook selection, penalty/dropout flags, and completion/attendance-like markers.
-5. **Responsibility label** — derived from school/central operator status and leadership titles.
-6. **Risk/exclusion queue** — candidates with dropout/three-strike/penalty signals requiring human review before partner exposure.
-7. **Data quality queue** — rows with missing/duplicate/corrected Discord/Notion fields or ambiguous branch/part fields.
+1. **Talent pool sizing** — generation, branch, school, normalized part별 후보 규모.
+2. **Candidate registry base** — generation + challenger ID/number 기반의 stable internal candidate identity.
+3. **Role-fit seed** — part/project part, senior status, operator title 기반의 초기 역할 적합도.
+4. **Activity/reliability label** — score, best-workbook selection, penalty/dropout flag, completion/attendance-like marker 기반의 활동/신뢰성 label.
+5. **Responsibility label** — school/central operator status와 leadership title 기반의 책임감 신호.
+6. **Risk/exclusion queue** — dropout/three-strike/penalty 신호가 있어 파트너 노출 전 사람 검토가 필요한 후보 queue.
+7. **Data quality queue** — 누락/중복/수정된 Discord/Notion 필드, 애매한 branch/part 필드를 정리하기 위한 queue.
 
-### Board-to-product normalization rules
+### Board-to-product 정규화 원칙
 
-- Use `generation + challenger_id` as the internal stable key; never use name, phone, email, or Discord fields as partner-facing IDs.
-- Convert part labels into NE(O)RDINARY HIRE roles before filtering: Plan/PM, Design, Web/FE, Server/BE, Android, iOS, Ops/Leadership.
-- Convert scores and event history into qualitative review states before partner exposure: `strong_signal`, `normal_signal`, `needs_operator_review`, `not_partner_ready`.
-- Treat bonus/penalty reasons as operator-only evidence; they can trigger review but should not be quoted or exposed.
-- Treat MT/payment/attendance-operation fields as non-hiring operational data unless a separate product decision explicitly includes them.
-- Require consent and artifact evidence before a Board-derived candidate becomes company-review-ready.
+- 내부 stable key는 `generation + challenger_id`를 사용한다. 이름, 전화번호, 이메일, Discord 필드는 partner-facing ID로 사용하지 않는다.
+- part label은 NE(O)RDINARY HIRE 역할로 변환한 뒤 필터링한다: Plan/PM, Design, Web/FE, Server/BE, Android, iOS, Ops/Leadership.
+- 점수와 이벤트 이력은 파트너 노출 전 qualitative review state로 변환한다: `strong_signal`, `normal_signal`, `needs_operator_review`, `not_partner_ready`.
+- bonus/penalty reason은 operator-only evidence로 취급한다. review trigger로는 쓸 수 있지만 인용하거나 노출하지 않는다.
+- MT/payment/attendance-operation 필드는 별도 제품 결정이 없으면 채용 판단 데이터로 쓰지 않는다.
+- Board-derived candidate가 company-review-ready가 되려면 동의와 artifact evidence가 필요하다.
 
-## 4. Derived signal taxonomy
+## 4. 파생 신호 분류
 
-Raw sources should be converted into normalized signals before company exposure.
+원천 데이터는 기업 노출 전에 normalize된 signal로 변환되어야 한다.
 
-| Signal | Derived from | Candidate-card expression | Risk |
+| 신호 | 파생 기준 | 후보 카드 표현 | 리스크 |
 | --- | --- | --- | --- |
-| Participation consistency | Attendance, submissions, activity count | “High consistency across program activities” | Can become unfair if absences had private reasons. |
-| Delivery reliability | deadline status, final project completion | “Submitted core artifacts on time” | Avoid punitive detail. |
-| Role fit | track, assignments, project role, tech stack | “Frontend / Product Planning fit” | Needs role normalization. |
-| Evidence strength | artifact quality, deployed URL, repo/Figma/Notion completeness | “Strong project evidence available” | Quality rubric must be explainable. |
-| Collaboration signal | peer review, team participation, leadership role | “Active feedback/collaboration participation” | Raw comments are sensitive. |
-| Growth signal | revision history, feedback reflection, assignment progression | “Improved structure after feedback” | Requires careful comparison and avoid overclaiming. |
-| Availability fit | registration, updated availability | “Available for part-time/project/full-time review” | Can become outdated quickly. |
-| Partner demand signal | shortlist, inquiry, missing-info request | “Partner interest generated” | Do not expose one partner’s interest to another. |
+| Participation consistency | 출석, 제출, 활동 횟수 | “프로그램 활동 전반에서 높은 일관성” | 결석에 사적 사유가 있었을 수 있으므로 불공정해질 수 있음 |
+| Delivery reliability | 마감 준수, 최종 프로젝트 완료 | “핵심 산출물을 기한 내 제출” | 처벌적 세부 정보 노출 방지 |
+| Role fit | track, 과제, 프로젝트 역할, tech stack | “Frontend / Product Planning fit” | 역할 normalize 필요 |
+| Evidence strength | 산출물 품질, 배포 URL, repo/Figma/Notion 완성도 | “강한 프로젝트 evidence 보유” | 품질 rubric이 설명 가능해야 함 |
+| Collaboration signal | 피어 리뷰, 팀 참여, 리더십 역할 | “피드백/협업 참여가 활발함” | raw comment는 민감 정보 |
+| Growth signal | revision history, feedback reflection, assignment progression | “피드백 이후 구조 개선” | 비교 기준을 신중히 설정하고 과장 금지 |
+| Availability fit | registration, updated availability | “part-time/project/full-time 검토 가능” | 빠르게 낡는 정보 |
+| Partner demand signal | shortlist, inquiry, missing-info request | “파트너 관심 발생” | 한 파트너의 관심을 다른 파트너에게 노출하지 않음 |
 
-## 5. Candidate-card data groups
+## 5. 후보 카드 데이터 그룹
 
-### Required for MVP card
+### MVP card에 필요한 데이터
 
-- Anonymous candidate ID
-- Role/track normalization
-- Availability/work preference if current
-- 2–4 strongest evidence summaries
-- Evidence confidence label
-- Collaboration/activity summary
-- Fit score or fit level with rationale
-- Controlled inquiry CTA
+- 익명 candidate ID
+- role/track normalization
+- 현재성 있는 availability/work preference
+- 가장 강한 evidence summary 2~4개
+- evidence confidence label
+- collaboration/activity summary
+- fit score 또는 fit level과 rationale
+- controlled inquiry CTA
 
-### Useful but gated
+### 유용하지만 gated 처리해야 하는 데이터
 
-- Public portfolio links
-- GitHub/Figma/Notion/deployed URLs
-- Specific project names
-- Team role details
-- Program/cohort details
+- 공개 포트폴리오 링크
+- GitHub/Figma/Notion/deployed URL
+- 구체적인 프로젝트명
+- 팀 내 역할 상세
+- 프로그램/cohort 상세
 
-### Forbidden in company view by default
+### 기본적으로 company view에서 금지되는 데이터
 
-- Name
-- Email
-- Phone number
+- 이름
+- 이메일
+- 전화번호
 - Discord ID, handle, message ID, raw message, raw channel context
-- Raw private Drive file IDs or excerpts
-- Raw Board rows, attendance logs, scores, peer comments, private feedback
-- Internal operator notes
-- Partner/customer confidential material
+- raw private Drive file ID 또는 excerpt
+- raw Board row, 출석 로그, 점수, peer comment, private feedback
+- 내부 운영진 메모
+- 파트너/고객 confidential material
 
-## 6. Data-readiness checklist per source
+## 6. 소스별 데이터 준비도 체크리스트
 
-Before using a source in product or scoring, answer:
+소스를 제품 또는 scoring에 사용하기 전 아래 질문에 답해야 한다.
 
-- [ ] Who owns this source operationally?
-- [ ] Is there explicit or implied consent for this use?
-- [ ] Is the source public, private, partner-confidential, or internal-only?
-- [ ] Which candidate-card signal does it support: Activity, Evidence, Collaboration, Growth?
-- [ ] What is the partner-safe projection?
-- [ ] What must never be exposed?
-- [ ] How fresh is the data and when does it expire?
-- [ ] Can a human operator override or correct it?
-- [ ] Is there a quality/confidence label?
+- [ ] 이 소스의 운영 소유자는 누구인가?
+- [ ] 이 use case에 대한 명시적 또는 묵시적 동의가 있는가?
+- [ ] 이 소스는 public, private, partner-confidential, internal-only 중 무엇인가?
+- [ ] Activity, Evidence, Collaboration, Growth 중 어떤 후보 카드 신호를 지원하는가?
+- [ ] partner-safe projection은 무엇인가?
+- [ ] 절대 노출하면 안 되는 것은 무엇인가?
+- [ ] 데이터는 얼마나 최신이며 언제 만료되는가?
+- [ ] human operator가 override 또는 correction할 수 있는가?
+- [ ] quality/confidence label이 있는가?
 
-## 7. Priority ingestion order
+## 7. 우선 연동 순서
 
 1. **Registration DB** — role, stack, availability, portfolio, consent baseline.
-2. **UMC Management Solution Board** — structured participation, assignments, roles, completion.
-3. **Submitted artifact links** — Notion/Figma/GitHub/deployed URLs as evidence.
+2. **UMC Management Solution Board** — 구조화된 참여, 과제, 역할, 수료 상태.
+3. **Submitted artifact links** — Notion/Figma/GitHub/deployed URL을 evidence로 사용.
 4. **Operator review labels** — evidence confidence, recommended role, privacy approval.
-5. **Partner interactions** — shortlist, inquiry, missing-info requests.
-6. **Community activity summaries** — Discord/peer/community signals after stricter privacy review.
+5. **Partner interactions** — shortlist, inquiry, missing-info request.
+6. **Community activity summaries** — Discord/peer/community signal은 더 엄격한 privacy review 이후 사용.
 
-## 8. Open decisions
+## 8. 남은 의사결정
 
-1. Which Board access mode should be used for the pilot: export, API, or manual sanitized upload?
-2. Which Board fields already have consent for recruiting/talent-review use, especially score/event and branch-level fields?
-3. Should Board-derived signals be shown as exact numbers, ranges, or qualitative labels?
-4. What is the minimum artifact evidence for a candidate to become company-review-ready?
-5. Who can approve a public portfolio/project link for partner exposure?
-6. How often should availability and Board-derived status be refreshed?
-7. Should peer review data be used only internally, or can it become partner-safe collaboration labels?
+1. pilot에서 어떤 Board 접근 방식을 사용할 것인가: export, API, manual sanitized upload?
+2. 어떤 Board 필드가 recruiting/talent-review use에 대한 동의를 이미 확보하고 있는가? 특히 score/event와 branch-level field.
+3. Board-derived signal은 exact number, range, qualitative label 중 어떤 방식으로 보여줄 것인가?
+4. 후보가 company-review-ready가 되기 위한 최소 artifact evidence는 무엇인가?
+5. partner exposure용 public portfolio/project link는 누가 승인할 수 있는가?
+6. availability와 Board-derived status는 얼마나 자주 refresh해야 하는가?
+7. peer review data는 내부용으로만 쓸 것인가, partner-safe collaboration label로 전환할 것인가?
 
-## 9. First practical data pull
+## 9. 첫 실무 데이터 추출
 
-For the first pilot, prepare a small sanitized sample table with 10–20 candidates and these columns:
+첫 pilot에서는 10~20명의 sanitized sample table을 만들고 아래 컬럼만 사용한다.
 
-| Column | Purpose |
+| 컬럼 | 목적 |
 | --- | --- |
-| source_generation | Board generation such as 7th/8th/9th/10th |
-| source_challenger_key | Internal key, generated from generation + challenger ID; never shown to partners |
-| anonymous_candidate_id | Partner-safe candidate reference |
-| normalized_role | Card role and filter |
-| track_or_part | Role-fit source |
-| participation_label | Activity signal |
-| assignment_completion_label | Reliability signal |
-| strongest_artifact_type | Evidence category |
-| strongest_artifact_summary | Partner-safe work proof |
-| collaboration_label | Team/peer/community signal |
-| growth_label | Improvement signal |
-| evidence_confidence | Operator trust label |
-| board_review_state | `strong_signal`, `normal_signal`, `needs_operator_review`, or `not_partner_ready` |
-| consent_status | Whether recruiting/talent-review use is confirmed |
-| exposure_status | `partner_safe`, `needs_review`, or `operator_only` |
-| next_missing_data | What must be collected before partner view |
+| source_generation | 7th/8th/9th/10th 같은 Board generation |
+| source_challenger_key | generation + challenger ID로 만든 internal key. 파트너에게 노출하지 않음 |
+| anonymous_candidate_id | partner-safe candidate reference |
+| normalized_role | 카드 역할과 필터 |
+| track_or_part | role-fit source |
+| participation_label | activity signal |
+| assignment_completion_label | reliability signal |
+| strongest_artifact_type | evidence category |
+| strongest_artifact_summary | partner-safe work proof |
+| collaboration_label | team/peer/community signal |
+| growth_label | improvement signal |
+| evidence_confidence | operator trust label |
+| board_review_state | `strong_signal`, `normal_signal`, `needs_operator_review`, `not_partner_ready` |
+| consent_status | recruiting/talent-review use가 확인되었는지 여부 |
+| exposure_status | `partner_safe`, `needs_review`, `operator_only` |
+| next_missing_data | partner view 전 추가로 수집해야 하는 데이터 |
 
-This sample should be reviewed manually before any scoring automation or partner-facing import.
+이 sample은 scoring automation 또는 partner-facing import 전에 반드시 사람이 수동 검토해야 한다.
