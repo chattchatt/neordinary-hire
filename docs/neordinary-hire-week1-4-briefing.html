@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NE(O)RDINARY HIRE 1~4주차 기획 브리핑</title>
+  <style>
+    :root {
+      --bg: #f7f7f4;
+      --paper: #fffefa;
+      --ink: #20201d;
+      --muted: #6f6b63;
+      --line: #e5e0d6;
+      --brand: #151515;
+      --accent: #4f46e5;
+      --accent-soft: #eef0ff;
+      --green: #0f766e;
+      --green-soft: #e8f5f3;
+      --orange: #b45309;
+      --orange-soft: #fff3df;
+      --shadow: 0 18px 45px rgba(32, 32, 29, 0.08);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(79, 70, 229, 0.11), transparent 32rem),
+        linear-gradient(180deg, #fbfaf6 0%, var(--bg) 100%);
+      line-height: 1.68;
+      word-break: keep-all;
+    }
+
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 48px 20px 72px;
+    }
+
+    .hero {
+      padding: 46px;
+      border: 1px solid var(--line);
+      border-radius: 32px;
+      background: rgba(255, 254, 250, 0.88);
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 18px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.02em;
+    }
+
+    h1, h2, h3 { line-height: 1.25; margin: 0; }
+
+    h1 {
+      max-width: 900px;
+      font-size: clamp(34px, 5vw, 64px);
+      letter-spacing: -0.055em;
+    }
+
+    .subtitle {
+      max-width: 850px;
+      margin: 22px 0 0;
+      color: var(--muted);
+      font-size: 20px;
+    }
+
+    .thesis {
+      margin-top: 30px;
+      padding: 24px;
+      border-left: 5px solid var(--brand);
+      border-radius: 18px;
+      background: #f3f1ea;
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+    }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 28px;
+    }
+
+    .meta {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .meta b { display: block; margin-bottom: 4px; font-size: 13px; color: var(--muted); }
+    .meta span { font-weight: 800; }
+
+    .toc {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 28px 0 34px;
+    }
+
+    .toc a {
+      display: block;
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: var(--paper);
+      color: var(--ink);
+      text-decoration: none;
+      font-weight: 800;
+      box-shadow: 0 8px 20px rgba(32, 32, 29, 0.04);
+    }
+
+    .toc a small {
+      display: block;
+      margin-top: 5px;
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    section {
+      margin-top: 30px;
+      padding: 34px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--paper);
+      box-shadow: 0 12px 32px rgba(32, 32, 29, 0.05);
+    }
+
+    .section-head {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .week-badge {
+      flex: 0 0 auto;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: #111;
+      color: #fff;
+      font-size: 13px;
+      font-weight: 900;
+    }
+
+    h2 { font-size: 30px; letter-spacing: -0.035em; }
+    h3 { margin-top: 24px; font-size: 20px; letter-spacing: -0.02em; }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .card {
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: #fff;
+    }
+
+    .card h3:first-child { margin-top: 0; }
+
+    .label {
+      display: inline-block;
+      margin-bottom: 10px;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: var(--green-soft);
+      color: var(--green);
+      font-size: 12px;
+      font-weight: 900;
+    }
+
+    .label.warn { background: var(--orange-soft); color: var(--orange); }
+    .label.blue { background: var(--accent-soft); color: var(--accent); }
+
+    ul, ol { padding-left: 1.2rem; }
+    li { margin: 7px 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 14px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+    }
+
+    th, td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      width: 24%;
+      background: #f5f3ed;
+      font-size: 14px;
+    }
+
+    tr:last-child th, tr:last-child td { border-bottom: 0; }
+
+    .quote {
+      margin: 18px 0;
+      padding: 22px;
+      border-radius: 18px;
+      background: #111;
+      color: #fff;
+      font-size: 22px;
+      font-weight: 900;
+      letter-spacing: -0.025em;
+    }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .step {
+      position: relative;
+      padding: 12px 14px;
+      border-radius: 14px;
+      background: var(--accent-soft);
+      color: #27215f;
+      font-weight: 800;
+    }
+
+    .step:not(:last-child)::after {
+      content: "→";
+      margin-left: 10px;
+      color: var(--accent);
+    }
+
+    .sync {
+      border: 1px solid #f2d39b;
+      background: #fffaf0;
+    }
+
+    .footer {
+      margin-top: 28px;
+      color: var(--muted);
+      font-size: 13px;
+      text-align: center;
+    }
+
+    @media (max-width: 860px) {
+      .hero { padding: 30px; }
+      .meta-grid, .toc, .grid-2, .grid-3 { grid-template-columns: 1fr; }
+      .section-head { display: block; }
+      .week-badge { display: inline-block; margin-bottom: 14px; }
+      section { padding: 24px; }
+      th, td { display: block; width: 100%; }
+      th { border-bottom: 0; }
+    }
+
+    @media print {
+      body { background: #fff; }
+      .wrap { max-width: none; padding: 0; }
+      .hero, section { box-shadow: none; break-inside: avoid; }
+      .toc { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <header class="hero">
+      <div class="eyebrow">PRODUCT BRIEFING · WEEK 1–4</div>
+      <h1>NE(O)RDINARY HIRE<br />1~4주차 기획 브리핑</h1>
+      <p class="subtitle">
+        너디너리 커뮤니티 안에서 이미 검증된 프로젝트·활동·협업 evidence를
+        파트너가 빠르고 안전하게 검토할 수 있는 익명 후보 카드 기반 채용 연결 웹서비스입니다.
+      </p>
+      <div class="thesis">
+        핵심은 “채용 플랫폼”을 새로 만드는 것이 아니라,<br />
+        커뮤니티 안의 신뢰와 활동 증거를 파트너가 판단 가능한 제품 경험으로 번역하는 것입니다.
+      </div>
+      <div class="meta-grid" aria-label="브리핑 메타 정보">
+        <div class="meta"><b>서비스명</b><span>NE(O)RDINARY HIRE</span></div>
+        <div class="meta"><b>1차 사용자</b><span>파트너 리뷰어</span></div>
+        <div class="meta"><b>2차 사용자</b><span>커뮤니티 후보</span></div>
+        <div class="meta"><b>MVP 형태</b><span>Web Service</span></div>
+      </div>
+    </header>
+
+    <nav class="toc" aria-label="목차">
+      <a href="#week1">1주차<small>문제 정의·가설</small></a>
+      <a href="#week2">2주차<small>경쟁사·유저 리서치</small></a>
+      <a href="#week3">3주차<small>서비스 정의·전략</small></a>
+      <a href="#week4">4주차<small>IA·Flow·Wireframe</small></a>
+    </nav>
+
+    <section id="week1">
+      <div class="section-head">
+        <div>
+          <h2>1주차 — 문제 정의 / 가설 / 시장 방향</h2>
+          <p>문제를 “채용 플랫폼 부족”이 아니라 “커뮤니티 evidence가 파트너 검토 단위로 번역되지 않는 문제”로 좁혔습니다.</p>
+        </div>
+        <span class="week-badge">WEEK 1</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <span class="label warn">핵심 문제</span>
+          <h3>검증된 활동 evidence는 있지만, 검토 가능한 표준 형식이 없다</h3>
+          <p>커뮤니티 기반 인재의 실제 역량은 프로젝트, 협업, 운영 참여, 성장 기록에 드러나지만 파트너가 빠르고 안전하게 검토할 수 있는 방식으로 정리되어 있지 않습니다.</p>
+        </div>
+        <div class="card">
+          <span class="label blue">해결 방향</span>
+          <h3>익명 후보 카드 + 루브릭 + 중개 플로우</h3>
+          <p>운영자가 검수한 evidence를 익명 후보 카드로 변환하고, 파트너가 shortlist/inquiry를 남기면 후보 동의와 운영자 중개 후 다음 단계로 연결합니다.</p>
+        </div>
+      </div>
+
+      <h3>문제 원인</h3>
+      <ul>
+        <li>후보의 실력은 이력서보다 프로젝트, 협업, 운영 참여, 성장 기록에 더 잘 드러납니다.</li>
+        <li>하지만 해당 evidence는 여러 문서, 포트폴리오, 운영자 기억, 활동 로그에 흩어져 있습니다.</li>
+        <li>원본을 그대로 파트너에게 제공하면 개인정보, 맥락 노이즈, 검토 부담이 생깁니다.</li>
+        <li>운영자 추천은 신뢰도가 높지만 반복 가능한 제품 경험으로 확장되기 어렵습니다.</li>
+      </ul>
+
+      <div class="quote">커뮤니티 안에서 발견된 가능성을 파트너가 검토 가능한 단위로 번역한다.</div>
+
+      <table>
+        <tr><th>가설</th><td>익명 후보 카드가 있으면 파트너는 신원 정보 없이도 1차 관심 여부를 판단할 수 있다.</td></tr>
+        <tr><th>기대 효과</th><td>파트너 검토 시간 감소, 후보 조기 신원 노출 방지, 운영 추천의 반복 가능성 확보.</td></tr>
+        <tr><th>보정 포인트</th><td>“후보 DB 공개”가 아니라 “익명·검수·중개 기반 evidence review workflow”로 정의합니다.</td></tr>
+      </table>
+    </section>
+
+    <section id="week2">
+      <div class="section-head">
+        <div>
+          <h2>2주차 — 경쟁사 분석 / 유저 리서치</h2>
+          <p>경쟁사는 일반 채용 플랫폼뿐 아니라 지인 추천, 커뮤니티 운영자 추천, ATS/HR SaaS까지 포함해 봐야 합니다.</p>
+        </div>
+        <span class="week-badge">WEEK 2</span>
+      </div>
+
+      <div class="grid-3">
+        <div class="card">
+          <span class="label">직접 경쟁</span>
+          <h3>개발자·주니어 채용 플랫폼</h3>
+          <p>이력서와 신원 기반 탐색에 강하지만, 커뮤니티 안의 실제 협업 evidence를 충분히 담기 어렵습니다.</p>
+        </div>
+        <div class="card">
+          <span class="label">간접 경쟁</span>
+          <h3>지인 추천·운영자 수동 추천</h3>
+          <p>신뢰도는 높지만 반복 가능한 비교, 검색, 상태 관리, 파트너 공유 경험이 약합니다.</p>
+        </div>
+        <div class="card">
+          <span class="label">잠재 경쟁</span>
+          <h3>HR SaaS·ATS·교육기관 연계</h3>
+          <p>내부 채용 관리에는 강하지만 community-origin evidence를 파트너 안전 카드로 변환하는 데는 약합니다.</p>
+        </div>
+      </div>
+
+      <h3>벤치마킹 요소</h3>
+      <ul>
+        <li>카드형 후보 정보 구조</li>
+        <li>비교 가능한 필드와 태그</li>
+        <li>shortlist 기능과 문의 CTA</li>
+        <li>추천 근거/evidence summary</li>
+        <li>검수 상태와 공개 가능 범위 표시</li>
+      </ul>
+
+      <h3>유저 리서치 우선순위</h3>
+      <table>
+        <tr><th>1순위 사용자</th><td>파트너 리뷰어 — 후보를 빠르게 검토하고, 관심 후보에만 문의하고 싶은 사용자.</td></tr>
+        <tr><th>2순위 사용자</th><td>커뮤니티 후보 — 활동 evidence는 있지만 신원/연락처가 무분별하게 공개되길 원하지 않는 사용자.</td></tr>
+        <tr><th>핵심 검증</th><td>파트너가 이름/연락처 없이 후보 카드만으로 1차 관심 판단을 할 수 있는가.</td></tr>
+      </table>
+
+      <div class="card">
+        <span class="label blue">핵심 질문</span>
+        <ol>
+          <li>파트너는 후보를 볼 때 어떤 근거를 가장 먼저 보는가?</li>
+          <li>이름/연락처 없이도 1차 관심 판단이 가능한가?</li>
+          <li>문의 전 반드시 필요한 정보는 무엇인가?</li>
+          <li>후보는 어떤 활동 정보까지 익명 공개를 허용할 수 있는가?</li>
+          <li>어떤 조건에서 신원/연락처 공개에 동의할 수 있는가?</li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="week3">
+      <div class="section-head">
+        <div>
+          <h2>3주차 — 서비스 정의 / 페르소나 / 전략 / 비즈니스 모델</h2>
+          <p>서비스의 중심을 “파트너 리뷰어가 신뢰 가능한 후보 evidence를 빠르게 판단하는 경험”으로 잡았습니다.</p>
+        </div>
+        <span class="week-badge">WEEK 3</span>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <span class="label blue">메인 페르소나</span>
+          <h3>파트너 리뷰어</h3>
+          <ul>
+            <li>스타트업, 파트너사, 채용 담당자, 팀 리더</li>
+            <li>일반 이력서만으로는 협업 가능성과 성장성을 판단하기 어려움</li>
+            <li>신뢰 가능한 추천을 원하지만 매번 수동 요청하는 방식은 비효율적임</li>
+          </ul>
+        </div>
+        <div class="card">
+          <span class="label blue">서브 페르소나</span>
+          <h3>커뮤니티 기반 후보</h3>
+          <ul>
+            <li>프로젝트, 스터디, 운영 참여 등 실제 활동 경험이 있음</li>
+            <li>이력서로 자신을 충분히 설명하기 어려움</li>
+            <li>정보가 무분별하게 공개되는 것을 원하지 않음</li>
+          </ul>
+        </div>
+      </div>
+
+      <h3>핵심 기능</h3>
+      <div class="grid-2">
+        <div class="card"><b>1. 익명 후보 카드</b><p>이름, 연락처, 민감 정보 없이 역량 evidence 중심으로 후보를 검토합니다.</p></div>
+        <div class="card"><b>2. 운영자 검수 evidence summary</b><p>프로젝트, 역할, 협업 방식, 성장 기록을 파트너가 이해하기 쉽게 요약합니다.</p></div>
+        <div class="card"><b>3. shortlist / inquiry</b><p>파트너가 관심 후보를 저장하고 조건이 맞을 때 문의할 수 있습니다.</p></div>
+        <div class="card"><b>4. 후보 동의 기반 신원 공개</b><p>파트너 문의 후 후보가 동의해야 신원과 연락처가 공개됩니다.</p></div>
+      </div>
+
+      <h3>린 캔버스 요약</h3>
+      <table>
+        <tr><th>문제</th><td>커뮤니티 인재의 실제 evidence가 파트너 검토 단위로 정리되지 않음.</td></tr>
+        <tr><th>고객</th><td>파트너 리뷰어, 커뮤니티 후보.</td></tr>
+        <tr><th>고유 가치</th><td>신뢰 기반 커뮤니티 추천을 안전하고 반복 가능한 채용 검토 경험으로 전환.</td></tr>
+        <tr><th>해결책</th><td>익명 후보 카드, evidence summary, shortlist/inquiry, 동의 기반 공개.</td></tr>
+        <tr><th>핵심 지표</th><td>후보 카드 조회, shortlist율, inquiry율, 동의율, 미팅 전환율.</td></tr>
+        <tr><th>경쟁 우위</th><td>너디너리 커뮤니티 evidence와 운영자 신뢰.</td></tr>
+      </table>
+    </section>
+
+    <section id="week4">
+      <div class="section-head">
+        <div>
+          <h2>4주차 — 기술 스택 / IA / Flow / Wireframe</h2>
+          <p>앱이 아니라 빠르게 검증 가능한 웹서비스로 정의하고, 파트너 대시보드와 익명 후보 상세 화면을 우선 설계합니다.</p>
+        </div>
+        <span class="week-badge">WEEK 4</span>
+      </div>
+
+      <table>
+        <tr><th>기술 스택</th><td>Web · Next.js/React 계열. 빠른 검증, 파트너 공유, 관리자 운영 편의성을 우선합니다.</td></tr>
+        <tr><th>IA 영역</th><td>Public/Entry, Candidate Submission, Admin, Partner, Trust/Policy.</td></tr>
+        <tr><th>화면 우선순위</th><td><code>/company</code>, <code>/company/[candidate]</code>, <code>/admin/members/[id]</code>, <code>/register</code>, <code>/</code>.</td></tr>
+      </table>
+
+      <h3>주요 IA</h3>
+      <div class="grid-2">
+        <div class="card"><b>Public / Entry</b><p>랜딩, 서비스 소개, 파트너 문의, 후보 등록 진입.</p></div>
+        <div class="card"><b>Candidate Submission</b><p>후보 기본 정보 입력, 프로젝트/evidence 제출, 공개 동의 범위 설정.</p></div>
+        <div class="card"><b>Admin</b><p>후보 목록, 후보 상세, evidence 검수, 익명 카드 생성, 공개 상태 관리.</p></div>
+        <div class="card"><b>Partner</b><p>후보 카드 리스트, 후보 상세, shortlist, inquiry 제출.</p></div>
+      </div>
+
+      <h3>핵심 Flow</h3>
+      <div class="card">
+        <span class="label">후보 등록</span>
+        <div class="flow">
+          <span class="step">후보 제출</span>
+          <span class="step">운영자 검수</span>
+          <span class="step">익명 카드 생성</span>
+          <span class="step">공개 범위 확인</span>
+          <span class="step">파트너 노출</span>
+        </div>
+      </div>
+      <div class="card">
+        <span class="label">파트너 검토</span>
+        <div class="flow">
+          <span class="step">파트너 로그인</span>
+          <span class="step">카드 리스트</span>
+          <span class="step">후보 상세</span>
+          <span class="step">shortlist</span>
+          <span class="step">inquiry</span>
+          <span class="step">후보 동의</span>
+          <span class="step">운영자 중개</span>
+        </div>
+      </div>
+
+      <h3>Wireframe 우선순위</h3>
+      <ol>
+        <li><b>/company</b> — 파트너 후보 카드 대시보드</li>
+        <li><b>/company/[candidate]</b> — 익명 후보 상세</li>
+        <li><b>/admin/members/[id]</b> — 운영자 검수 화면</li>
+        <li><b>/register</b> 또는 <b>/register/quick</b> — 후보 등록/제출 화면</li>
+        <li><b>/</b> — 서비스 랜딩</li>
+      </ol>
+    </section>
+
+    <section class="sync" id="sync">
+      <div class="section-head">
+        <div>
+          <h2>지금 남은 핵심 동기화 포인트</h2>
+          <p>개발 이전에 아래 기획 결정을 먼저 맞추면 이후 PRD, 디자인, 구현 범위가 흔들리지 않습니다.</p>
+        </div>
+      </div>
+      <ol>
+        <li>메인 페르소나를 <b>파트너 리뷰어</b>로 완전히 고정할지</li>
+        <li>후보 경험을 MVP에서 어디까지 깊게 만들지</li>
+        <li>익명 후보 카드에 들어갈 필드 범위</li>
+        <li>운영자 검수 기준과 루브릭</li>
+        <li>파트너에게 보여줄 evidence의 깊이</li>
+        <li>신원 공개 동의 플로우</li>
+        <li>1차 검증 대상 파트너 3~5곳</li>
+        <li>외부 제출용 근거 데이터와 출처 정리</li>
+        <li>Figma 산출물 제작 순서: IA/Flow 먼저인지, /company 와이어프레임 먼저인지</li>
+      </ol>
+      <div class="quote">권장 다음 액션: 파트너 대시보드와 익명 후보 상세 화면을 먼저 만들고, 그 화면으로 파트너 인터뷰를 진행합니다.</div>
+    </section>
+
+    <p class="footer">Generated as a public-safe product briefing artifact for NE(O)RDINARY HIRE.</p>
+  </main>
+</body>
+</html>
