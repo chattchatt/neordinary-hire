@@ -27,3 +27,7 @@ Partner organization record. Access and approval state should determine company-
 ## Bookmark
 
 Company-to-member shortlist relationship. This supports partner review workflow without exposing direct talent contact data.
+
+## Source inventory
+
+Use [`docs/data-source-inventory.md`](data-source-inventory.md) to decide which raw data sources can feed these entities, which candidate-card signals they support, and what partner-safe projection is allowed.

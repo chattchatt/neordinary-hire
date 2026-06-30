@@ -42,6 +42,7 @@ NE(O)RDINARY HIRE is not:
 - [`docs/admin-policy.md`](docs/admin-policy.md): internal operator review policy
 - [`docs/scoring-policy.md`](docs/scoring-policy.md): score explanation and guardrails
 - [`docs/data-model.md`](docs/data-model.md): product-level entity map aligned with Prisma
+- [`docs/data-source-inventory.md`](docs/data-source-inventory.md): source inventory for UMC Board, artifacts, community signals, and candidate-card data readiness
 - [`docs/release-checklist.md`](docs/release-checklist.md): release readiness checks
 
 ## Development
