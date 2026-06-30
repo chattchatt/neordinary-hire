@@ -193,3 +193,43 @@ UMC Management Solution Board는 참여, 과제, 역할, 수료 상태를 연결
 | next_missing_data | partner view 전 추가로 수집해야 하는 데이터 |
 
 이 sample은 scoring automation 또는 partner-facing import 전에 반드시 사람이 수동 검토해야 한다.
+
+## 10. Google Drive 발견 후보와 활용 원칙
+
+Google Drive 검색은 메타데이터 수준의 후보 발굴로만 수행했다. Drive에 존재하는 파일명, 원문, 개인 식별자, 파일 ID, 링크, row-level 데이터는 이 GitHub 문서에 옮기지 않는다. Drive 자료는 `원천 데이터`가 아니라, 먼저 소유자·동의·민감도·제품 신호를 판정해야 하는 `발견 후보`로 취급한다.
+
+### 발견된 후보 범주
+
+| Drive 후보 범주 | 제품상 가치 | 후보 카드 연결 | 기본 처리 |
+| --- | --- | --- | --- |
+| NE(O)RDINARY / UMC 회의록 | 파트너 문제, 운영 의사결정, 포지셔닝, 현장 니즈 확인 | Research / Partner demand | 익명화된 synthesis만 SOT에 반영. 원문과 참석자 정보는 비공개 |
+| 행사 소개서, 스폰서십, 제안 자료 | 기업/기관이 반응하는 메시지, 시장 포지셔닝, 제안 구조 확인 | Partner demand / Positioning | 공개 가능 여부 확인 전까지 partner-confidential로 취급 |
+| 해커톤 신청, 투표, 만족도, 인원 배치, 평가 루브릭 | 실제 참여, 산출물, 평가 기준, 피드백/만족도 신호 | Activity / Evidence / Growth | 동의와 익명화 후에만 후보 신호로 전환. raw 응답은 비공개 |
+| 인재풀, 채용 추천, 후보 DB 성격의 Sheet | 가장 직접적인 후보 registry와 채용 관심/추천 신호 | Candidate registry / Availability / Role fit | 최우선 검토 대상이지만 highly restricted. 명시 동의와 접근권한 정리 전까지 내부용 |
+| 이력서, 포트폴리오, file response 폴더 | 후보가 직접 제출한 강한 작업 증거 | Submitted artifact / Evidence | 후보별 공개 승인 또는 opt-in 없이는 파트너 노출 금지. 원본 파일은 운영자 검토용 |
+| 운영비, 권한, 예산, 업무분담, 행사 운영 문서 | 데이터 거버넌스, 접근권한, 운영 맥락 확인 | Governance / Audit | 후보 scoring에는 사용하지 않음. 권한·보존·책임자 확인에만 사용 |
+
+### Drive-to-product 처리 규칙
+
+1. Drive 파일은 먼저 `category`, `owner`, `sensitivity`, `consent_basis`, `candidate_signal`, `partner_safe_projection`만 inventory화한다.
+2. 공개 GitHub, 파트너-facing 카드, PR comment에는 raw Drive 링크, 파일 ID, 원문 excerpt, 개인명, 연락처, 후보별 식별 정보를 넣지 않는다.
+3. 회의록과 제안 자료는 문제 정의, 포지셔닝, 파트너 니즈 가설을 강화하는 데 사용하되, 후보 평가 데이터로 직접 사용하지 않는다.
+4. Sheet/Form 응답은 sanitized export와 consent map이 준비된 뒤에만 candidate registry 또는 signal source로 연결한다.
+5. 이력서/포트폴리오 파일은 Drive에서 자동 수집하지 않고, 후보자가 HIRE 용도로 공개 승인한 링크 또는 요약만 후보 카드 evidence로 사용한다.
+6. 운영/예산/권한 문서는 제품 데이터가 아니라 접근 통제와 감사 기준을 정하는 참고 자료로만 사용한다.
+
+### Drive 후보 우선순위
+
+1. **인재풀/채용 추천 Sheet** — 후보 registry, availability, role fit을 확인할 수 있는 1순위 후보. 단, consent-gated.
+2. **해커톤 루브릭/Form/만족도/배치 자료** — Activity, Evidence, Growth 신호를 정의하는 데 유용한 2순위 후보.
+3. **포트폴리오/File response 폴더** — 강한 evidence 후보이지만 후보별 공개 승인이 필요하다.
+4. **회의록/제안 자료** — 문제 정의, 파트너 니즈, 메시지 검증에 사용한다.
+5. **운영비/권한/예산 문서** — governance와 access policy 참고로만 사용한다.
+
+### 세션에서 맞춰야 할 기획 포인트
+
+- Drive 안에서 NE(O)RDINARY HIRE의 authoritative source-of-record로 인정할 폴더/Sheet는 무엇인가?
+- 기존 신청서/Form에 “인재 추천·채용 검토·기업 소개” 목적의 동의 문구가 포함되어 있는가?
+- 기업/기관 제안 자료와 회의록은 내부 리서치에만 쓸 것인가, 공개 PRD/SOT에도 익명화 synthesis로 반영할 수 있는가?
+- 후보 포트폴리오는 Drive에 있는 기존 제출물을 읽어오는 방식이 아니라, 후보가 HIRE용으로 opt-in 업로드/연결하는 방식으로 설계할 것인가?
+- Drive 데이터의 보존 기간, 접근 권한, 삭제 요청, 후보별 정정 요청은 누가 운영 책임을 지는가?
