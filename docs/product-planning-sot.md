@@ -19,6 +19,7 @@ Related execution docs:
 - [`docs/scoring-policy.md`](scoring-policy.md) — score explanation guardrails
 - [`docs/data-source-inventory.md`](data-source-inventory.md) — Data Source SOT와 후보 카드 데이터 준비도
 - [`docs/overseas-reference-research.md`](overseas-reference-research.md) — 해외 레퍼런스 및 영어 키워드 맵
+- [`docs/planning-session-brief-2026-07-01.md`](planning-session-brief-2026-07-01.md) — 2026-07-01 기획 세션 핵심 브리프
 
 ## 2. Product principle
 
