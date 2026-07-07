@@ -1,0 +1,77 @@
+name: Product work
+about: Product-managed work item for NE(O)RDINARY HIRE
+labels: ["type:feature"]
+body:
+  - type: textarea
+    id: product-question
+    attributes:
+      label: Product question
+      description: What uncertainty or user problem does this work answer?
+      placeholder: Can partners understand candidate fit from anonymized evidence?
+    validations:
+      required: true
+  - type: dropdown
+    id: user
+    attributes:
+      label: Primary user
+      options:
+        - Talent
+        - Admin/Operator
+        - Company/Partner
+        - Internal product ops
+    validations:
+      required: true
+  - type: dropdown
+    id: requirement-type
+    attributes:
+      label: Requirement type
+      options:
+        - Functional
+        - Non-functional
+        - Business
+        - Security/privacy
+        - Documentation/ops
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope
+      description: What is included?
+    validations:
+      required: true
+  - type: textarea
+    id: out-of-scope
+    attributes:
+      label: Out of scope
+      description: What should not be solved in this issue?
+    validations:
+      required: false
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: Bullet the observable completion criteria.
+      value: |
+        - [ ]
+        - [ ]
+        - [ ]
+    validations:
+      required: true
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification plan
+      description: Tests, lint/build, manual routes, privacy checks, or docs checks.
+      value: |
+        - [ ] npm run lint
+        - [ ] npm run build
+    validations:
+      required: true
+  - type: textarea
+    id: privacy
+    attributes:
+      label: Privacy/security impact
+      description: Note personal data, raw evidence, secrets, or company-view exposure risks.
+    validations:
+      required: true
