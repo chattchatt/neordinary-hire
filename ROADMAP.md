@@ -14,6 +14,7 @@
 
 Goal: partners can review anonymized candidates and request next steps.
 
+- Week 5 feature specification and service policy baseline
 - Company candidate detail page
 - Shortlist save flow
 - Inquiry CTA
@@ -55,7 +56,9 @@ Priority order:
 
 1. Privacy exposure verification
 2. Company candidate detail
-3. Score explanation
-4. Shortlist save
-5. Inquiry CTA
-6. Evidence summary quality follow-up
+3. Qualified inquiry CTA
+4. Admin company-ready publishing rule
+5. Candidate registration consent clarity
+6. Score explanation
+7. Shortlist save
+8. Evidence summary quality follow-up

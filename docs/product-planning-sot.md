@@ -20,6 +20,9 @@ Related execution docs:
 - [`docs/data-source-inventory.md`](data-source-inventory.md) — Data Source SOT와 후보 카드 데이터 준비도
 - [`docs/overseas-reference-research.md`](overseas-reference-research.md) — 해외 레퍼런스 및 영어 키워드 맵
 - [`docs/planning-session-brief-2026-07-01.md`](planning-session-brief-2026-07-01.md) — 2026-07-01 기획 세션 핵심 브리프
+- [`docs/feature-spec.md`](feature-spec.md) — 5주차 기능명세서 SOT
+- [`docs/service-policy.md`](service-policy.md) — 5주차 정책서 SOT
+- [`docs/planning-session-brief-2026-07-01-week5.md`](planning-session-brief-2026-07-01-week5.md) — 5주차 업그레이드 세션 전달 요약
 
 ## 2. Product principle
 
@@ -549,7 +552,72 @@ Start
 - **와이어프레임**: MVP 검증 기준으로 `Landing`, `Candidate Register`, `Admin Detail`, `Company Dashboard`, `Company Candidate Detail`을 우선 제작한다.
 - **검증 포인트**: 개발 착수 전, 파트너가 익명 카드만 보고 shortlist 판단을 할 수 있는지 3~5명에게 테스트한다.
 
-## 13. Product decisions to sync before deeper development
+## 13. 5주차 워크북 기반 기능명세서·정책서·MVP 우선순위 산출물
+
+> 이 섹션은 5주차 워크북 원문을 보관하지 않고, NE(O)RDINARY HIRE에 필요한 기능 설계·정책·우선순위 의사결정으로 변환한 것이다. 상세 표는 [`docs/feature-spec.md`](feature-spec.md)와 [`docs/service-policy.md`](service-policy.md)를 기준으로 관리한다.
+
+### 13.0 5주차 과제 제출용 요약
+
+| 과제 항목 | 작성안 |
+| --- | --- |
+| 기능명세서 대상 | 후보 등록/빠른 등록, 운영자 evidence 검수, 익명 후보 카드 생성, 파트너 리스트/상세 검토, shortlist, qualified inquiry, privacy notice. |
+| 정책서 대상 | 입력 유효성, 권한 제한, company-facing 콘텐츠 노출/정렬, evidence·미디어 업로드, 신원 공개 threshold, 개정 이력. |
+| MVP 기준 | “파트너가 익명 후보 evidence를 보고 다음 단계 문의를 남길 수 있는가”를 검증하는 최소 기능만 포함한다. |
+| 우선순위 프레임워크 | MoSCoW를 기본으로 사용하고, 다음 스프린트 실행 순서는 privacy/inquiry 리스크 중심의 아이젠하워 관점으로 보정한다. |
+| 5주차에서 역으로 보정되는 내용 | 1–4주차 산출물은 화면 구조만으로 충분하지 않다. 각 화면은 트리거·로직·결과·예외 케이스·정책 기준을 가져야 구현 가능한 기획이 된다. |
+
+### 13.1 1–4주차 보완 반영
+
+- **1주차 문제 정의 보완:** 문제는 “좋은 후보를 찾기 어렵다”가 아니라, partner-safe하게 검토 가능한 기능 단위가 없다는 점까지 포함한다. 그래서 문제 해결안은 `익명 후보 카드 + evidence 검수 + qualified inquiry`로 명확히 좁힌다.
+- **2주차 경쟁/리서치 보완:** 경쟁사 비교는 기능 단위로 다시 본다. HIRE가 검증해야 할 질문은 채용 플랫폼보다 기능이 많은지가 아니라, 익명 evidence card만으로 shortlist/inquiry가 발생하는지다.
+- **3주차 페르소나 보완:** persona는 권한과 정책으로 연결한다. 후보는 consent owner, 운영자는 evidence/publish owner, 파트너는 anonymous reviewer로 정의한다.
+- **4주차 IA/Flow 보완:** IA와 flow에 예외 상태를 추가한다. 접근 권한 없음, 필수값 누락, evidence 부족, publish 차단, 문의 맥락 부족, 신원 공개 조건 미충족이 MVP 설계에 포함되어야 한다.
+
+### 13.2 기능명세서 핵심 구조
+
+| 기능 ID | 기능명 | 핵심 트리거 → 결과 | 우선순위 |
+| --- | --- | --- | --- |
+| HIRE-REG-001 | 후보 상세 등록 | 후보가 상세 정보를 제출하면 필수값/동의를 검증하고 `pending review`로 저장한다. | Must / P0 |
+| HIRE-REG-002 | 후보 빠른 등록 | 후보가 최소 정보를 제출하면 운영자 보완 검수 큐에 올린다. | Must / P0 |
+| HIRE-ADM-001 | 후보 evidence 검수 | 운영자가 원본 정보를 partner-safe summary와 공개 상태로 변환한다. | Must / P0 |
+| HIRE-ADM-002 | 익명 후보 카드 생성 | 운영자가 금지 필드를 제거한 company-ready 카드를 발행한다. | Must / P0 |
+| HIRE-CMP-001 | 파트너 후보 리스트 검토 | 파트너가 익명 후보 카드를 비교하고 shortlist/inquiry 진입점을 확인한다. | Must / P0 |
+| HIRE-CMP-002 | 파트너 후보 상세 검토 | 파트너가 evidence, fit signal, score rationale, 숨김 정보 안내를 확인한다. | Must / P0 |
+| HIRE-INQ-001 | Shortlist 저장 | 파트너가 관심 후보를 저장하고 saved 상태를 확인한다. | Should / P1 |
+| HIRE-INQ-002 | Qualified inquiry 제출 | 파트너가 목적/역할/필요 시점을 남기면 운영자 중개 inquiry가 생성된다. | Must / P0 |
+| HIRE-TRU-001 | Partner-safe privacy notice | 파트너 화면에서 숨김 정보와 공개 조건을 안내한다. | Must / P0 |
+| HIRE-TRU-002 | Revision and decision log | 기능/정책 변경 이력을 남겨 기획·디자인·개발 기준을 동기화한다. | Should / P1 |
+
+### 13.3 정책서 핵심 구조
+
+| 정책 영역 | HIRE 적용 기준 |
+| --- | --- |
+| 유효성 검사 | company-ready 후보는 role/interest, 최소 1개 evidence summary, 후보 동의가 필요하다. Inquiry는 목적/역할/필요 시점을 포함해야 qualified로 본다. |
+| 이용 권한 제한 | 후보는 본인 제출과 동의 확인, 운영자는 원본 검수와 발행, 파트너는 익명 카드/상세/문의만 가능하다. |
+| 콘텐츠 노출 및 정렬 | company view는 company-ready 후보를 우선 노출하고, low-confidence evidence는 숨기지 말고 명시한다. |
+| evidence/media | 원문 로그·Drive 원문·file ID·연락처·내부 노트는 partner 비노출이다. 공개 링크/파일 업로드는 동의와 검수 후에만 사용한다. |
+| 신원 공개 | qualified inquiry, 운영자 확인, 후보의 특정 동의, 최소 필요 정보 원칙을 모두 만족해야 한다. |
+| 개정 이력 | privacy, evidence, inquiry, scoring, permission 기준 변경은 날짜·이유·검증 항목을 남긴다. |
+
+### 13.4 MVP 우선순위
+
+| MoSCoW | 포함 기능 | 이유 |
+| --- | --- | --- |
+| Must Have | 후보 등록, 운영자 evidence 검수, 익명 후보 카드, 파트너 리스트/상세, qualified inquiry, privacy notice | 핵심 검증 질문인 “익명 evidence review가 문의로 이어지는가”에 직접 필요하다. |
+| Should Have | shortlist 저장, revision log, evidence confidence label 고도화 | 사용성과 운영 신뢰를 높이지만 inquiry 검증 자체를 막지는 않는다. |
+| Could Have | partner-specific dashboard, shortlist export/report, inquiry status page, role-specific scoring settings | 파일럿 반복 운영 후 가치가 커진다. |
+| Won't Have for MVP | full ATS, 자동 합격/불합격 판단, 공개 후보 프로필, direct contact marketplace, native app/PWA | 초기 검증 범위를 넓히고 개인정보 리스크를 키운다. |
+
+### 13.5 다음 스프린트 실행 순서
+
+1. company-facing privacy exposure verification을 먼저 고정한다.
+2. `/company/[candidate]` 상세에서 evidence, fit signal, score rationale, privacy notice를 완성한다.
+3. qualified inquiry CTA를 구현하거나 명확한 placeholder + tracking issue로 남긴다.
+4. admin에서 company-ready 발행 조건과 publish blocking rule을 명확히 한다.
+5. 후보 등록의 consent copy와 missing evidence 안내를 정리한다.
+6. shortlist 저장은 P1로 두되, partner walkthrough에 필요한 수준까지는 확보한다.
+
+## 14. Product decisions to sync before deeper development
 
 These are the discussion points that should be shared with the product owner before expanding implementation scope.
 
@@ -570,22 +638,25 @@ These are the discussion points that should be shared with the product owner bef
 4. **Partner-specific views:** Do partners need custom role requirements and saved review sessions, or is one shared dashboard enough for MVP?
 5. **Evidence quality threshold:** What minimum evidence coverage makes a candidate company-review-ready?
 
-## 14. Planning-to-implementation gates
+## 15. Planning-to-implementation gates
 
 Before broadening engineering scope beyond Company Review MVP, complete the following gates:
 
 - [ ] P0 partner wedge is selected.
 - [ ] P0 talent wedge is selected.
+- [ ] MVP feature specification is aligned with `docs/feature-spec.md`.
+- [ ] MVP policy rules are aligned with `docs/service-policy.md`.
 - [ ] Identity reveal threshold is documented in `docs/company-view-policy.md` or a linked consent policy.
 - [ ] At least 5 partner walkthroughs are summarized.
 - [ ] At least 10 talent/community survey responses or 5 interviews are summarized.
 - [ ] Company-facing privacy verification remains zero-defect.
 - [ ] Any market-size claim used externally has a dated source and verification note.
 
-## 15. Decision log
+## 16. Decision log
 
 | Date | Decision | Why | Follow-up |
 | --- | --- | --- | --- |
 | 2026-07-01 | Keep GitHub SOT public-safe and sanitized. | The repo is public and must not contain private workbook/PDF/community/customer data. | Store raw research only in approved private workspace. |
 | 2026-07-01 | Treat market sizing as operational SOM until pricing/conversion evidence exists. | Early service value is still being validated. | Convert to revenue SOM after partner pilots. |
 | 2026-07-01 | Keep MVP partner-review-first, not ATS-first. | Core risk is whether anonymized evidence creates trustworthy next-step demand. | Revisit after partner walkthroughs. |
+| 2026-07-01 | Add Week 5 feature specification and policy layer before deeper implementation. | IA/wireframe is not enough for development; MVP surfaces need trigger, logic, result, exception, permission, and priority rules. | Keep `docs/feature-spec.md` and `docs/service-policy.md` synchronized with implementation changes. |

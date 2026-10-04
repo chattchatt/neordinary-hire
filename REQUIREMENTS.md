@@ -6,6 +6,12 @@
 - **Non-functional requirements:** quality, privacy, performance, reliability, and maintainability expectations.
 - **Business requirements:** outcomes that make the product worth operating.
 
+## Planning requirements
+
+- MVP implementation must stay aligned with `docs/feature-spec.md` feature IDs and priorities.
+- Privacy, permission, validation, content exposure, and identity reveal behavior must stay aligned with `docs/service-policy.md`.
+- Product changes that alter partner-facing exposure or inquiry flow must update the feature specification and policy before being considered complete.
+
 ## Functional requirements
 
 ### Talent registration
@@ -26,6 +32,13 @@
 - Company users can open candidate detail pages that explain fit, evidence, and score reasoning without exposing forbidden fields.
 - Company users can save a shortlist.
 - Company users can send an inquiry or request next-step contact through a controlled CTA.
+
+### Trust and policy
+
+- Candidate registration must collect explicit consent for anonymized review and later controlled identity reveal.
+- Admin publishing must block company exposure when required partner-safe fields are missing or forbidden fields are detected.
+- Partner inquiry must collect enough context to qualify the next step before any identity reveal process begins.
+- Feature and policy changes must preserve revision/decision history.
 
 ## Non-functional requirements
 
@@ -49,3 +62,4 @@
 4. Inquiry CTA exists and routes to a controlled next step.
 5. Automated or manual privacy verification confirms forbidden fields are not rendered in company view.
 6. Product docs and issue state are updated after delivery.
+7. `docs/feature-spec.md` and `docs/service-policy.md` remain synchronized with any shipped workflow change.

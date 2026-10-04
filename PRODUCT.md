@@ -11,7 +11,9 @@ Can community activity, project evidence, and operator review produce a more tru
 
 ## Planning source of truth
 
-Use [`docs/product-planning-sot.md`](docs/product-planning-sot.md) as the current planning SOT before widening implementation scope. It tracks the problem definition, hypotheses, research plan, competitor framing, and product decisions that must be synchronized before deeper development.
+Use [`docs/product-planning-sot.md`](docs/product-planning-sot.md) as the current planning SOT before widening implementation scope. It tracks the problem definition, hypotheses, research plan, competitor framing, feature specification, policy rules, MVP priorities, and product decisions that must be synchronized before deeper development.
+
+Implementation-facing planning details live in [`docs/feature-spec.md`](docs/feature-spec.md) and [`docs/service-policy.md`](docs/service-policy.md).
 
 ## Current product phase
 
@@ -34,6 +36,7 @@ The product should first prove that a partner can understand candidate fit from 
 3. **Explainable matching** — scores and badges should show why a candidate is relevant, not just rank people opaquely.
 4. **Operator accountability** — uncertain Discord/Drive matches must stay reviewable and should not become automatic truth.
 5. **Small product loops** — each sprint should ship a measurable improvement to registration, admin review, company review, or partner inquiry.
+6. **Specification before expansion** — new MVP surfaces should have a feature ID, trigger/logic/result, exception handling, policy rule, and priority before implementation expands.
 
 ## In scope now
 
@@ -43,6 +46,7 @@ The product should first prove that a partner can understand candidate fit from 
 - Admin review dashboard and talent detail
 - Company dashboard with anonymized talent cards
 - Company candidate detail, shortlist, inquiry CTA, and scoring explanation
+- MVP feature specification and service policy for registration, admin publish, partner review, and identity reveal
 
 ## Out of scope for now
 

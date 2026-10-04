@@ -80,7 +80,19 @@ Current implementation uses a dark, premium partner-gate surface and light card-
 - Cards: rounded, high-contrast, readable on laptop screens during partner walkthroughs.
 - Typography: concise headings, plain Korean explanations, avoid HR jargon when possible.
 
-## 8. Component decisions
+## 8. Feature specification hooks
+
+Partner-facing and admin-facing surfaces should map to the Week 5 feature IDs before implementation expands:
+
+- Registration surfaces: `HIRE-REG-001`, `HIRE-REG-002`
+- Admin curation and publish: `HIRE-ADM-001`, `HIRE-ADM-002`
+- Partner review: `HIRE-CMP-001`, `HIRE-CMP-002`
+- Shortlist/inquiry: `HIRE-INQ-001`, `HIRE-INQ-002`
+- Trust and policy notice: `HIRE-TRU-001`, `HIRE-TRU-002`
+
+Each UI state should document its trigger, system logic, result, exception handling, and priority in [`docs/feature-spec.md`](docs/feature-spec.md).
+
+## 9. Component decisions
 
 | Component | Purpose | Required states |
 | --- | --- | --- |
@@ -91,7 +103,7 @@ Current implementation uses a dark, premium partner-gate surface and light card-
 | Shortlist action | Let partner mark next-step interest. | Unsaved, saved, save failed, local/session persistence notice. |
 | Inquiry CTA | Controlled next-step request. | Ready, submitted, missing context, routing failed. |
 
-## 9. Privacy copy rules
+## 10. Privacy copy rules
 
 Use clear copy that explains what is hidden and why.
 
@@ -107,14 +119,14 @@ Avoid:
 - “채용 확정,” “자동 추천,” or wording that implies automated hiring decisions.
 - Copy that pressures talent to reveal identity before partner intent is qualified.
 
-## 10. Accessibility and responsive requirements
+## 11. Accessibility and responsive requirements
 
 - Company review must be usable on laptop width first; mobile should remain readable but is not the primary partner-review context.
 - Do not rely on color alone for score/fit states; include text labels.
 - Error and empty states must explain recovery paths.
 - CTA buttons should have descriptive labels in Korean.
 
-## 11. Open design/product questions
+## 12. Open design/product questions
 
 These questions must be resolved or consciously deferred before expanding the MVP:
 
@@ -125,7 +137,7 @@ These questions must be resolved or consciously deferred before expanding the MV
 5. What is the minimum evidence coverage for “company-review-ready”?
 6. Should the product language remain “Hire,” or shift toward “Talent Review” for safer early validation?
 
-## 12. Design verification checklist
+## 13. Design verification checklist
 
 Before shipping partner-facing UI changes:
 
@@ -135,3 +147,4 @@ Before shipping partner-facing UI changes:
 - [ ] Empty, loading, and error states are understandable.
 - [ ] Inquiry/shortlist action has a controlled next step.
 - [ ] Product docs are updated when UI changes alter the workflow.
+- [ ] The relevant feature ID and policy rule are updated when trigger, logic, exception, permission, or priority changes.
